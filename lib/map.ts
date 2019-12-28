@@ -19,6 +19,9 @@ export function map<T, U>(
   return mapHandler;
 }
 
+/**
+ * @internal
+ */
 class Map<T, U> extends Queued<T, U> {
   constructor(readonly callback: MapCallback<T, U>) {
     super();

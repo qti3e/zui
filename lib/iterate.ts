@@ -18,6 +18,9 @@ export function iterate<T>(
   return iterateHandler;
 }
 
+/**
+ * @internal
+ */
 class Iterate<T> implements ZuiReceiver<T> {
   constructor(readonly callback: IterateCallback<T>) {}
 

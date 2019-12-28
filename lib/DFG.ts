@@ -83,7 +83,7 @@ export function handleNextTick() {
 
   for (const widget of changedWidgets) {
     const parent = Widget.parentOf(widget);
-    if (parent && changedWidgets.has(parent)) continue;
+    if (parent && changedWidgets.has(parent as any)) continue;
     // Request redraw for the widget.
   }
 }

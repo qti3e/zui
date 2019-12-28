@@ -10,6 +10,9 @@ export function iterator<T>(iter: Iterator<T>): ZuiEmitter<T> {
   return new IteratorHandler(iter);
 }
 
+/**
+ * @internal
+ */
 class IteratorHandler<T> implements ZuiEmitter<T> {
   private done = false;
 

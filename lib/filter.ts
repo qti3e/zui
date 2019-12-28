@@ -33,8 +33,9 @@ export function filter<T>(
   return filterHandler;
 }
 
-// The filter handler.
-
+/**
+ * @internal
+ */
 class Filter<T> extends Queued<T, T> {
   constructor(private readonly callback: FilterFunction<T>) {
     super();

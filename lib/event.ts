@@ -42,6 +42,9 @@ export function event<K extends keyof GlobalEventHandlersEventMap>(
   return handler;
 }
 
+/**
+ * @internal
+ */
 class EventHandler<T> extends Queued<T, T> {
   receive(event: T) {
     this.enqueue(event);
