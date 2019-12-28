@@ -35,3 +35,10 @@ export interface Point2D {
   x: number;
   y: number;
 }
+
+export interface BoundingBox {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
