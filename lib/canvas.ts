@@ -88,15 +88,18 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
 
     const size = widget.getSize();
 
-    // 0. Clip
+    // 0. Draw background.
+    context.shadowColor = "white";
+    context.shadowBlur = 15;
+    context.shadowOffsetX = 15;
+    context.fillStyle = widget.background.toString();
+    context.fillRect(0, 0, size.width, size.height);
+
+    // 1. Clip
     context.beginPath();
     context.moveTo(0, 0);
     context.rect(0, 0, size.width, size.height);
     context.clip();
-
-    // 1. Draw background.
-    context.fillStyle = widget.background.toString();
-    context.fillRect(0, 0, size.width, size.height);
 
     // 2. Draw element.
     widget.draw();
@@ -106,5 +109,8 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       this.draw(child.position, child.widget);
 
     context.restore();
+
+    // Call afterDraw.
+    if (widget.afterDraw) widget.afterDraw();
   }
 }
