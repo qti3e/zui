@@ -60,7 +60,7 @@ export abstract class Widget {
   /**
    * Draw the widget.
    */
-  abstract draw(): void;
+  abstract draw(ctx: CanvasRenderingContext2D): void;
 
   /**
    * It will be called after the draw of the current element and all of its

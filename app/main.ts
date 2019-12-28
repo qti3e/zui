@@ -17,7 +17,15 @@ class Sidebar extends zui.Widget {
     };
   }
 
-  draw() {}
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.moveTo(50, 0);
+
+    ctx.fillStyle = "#000";
+    ctx.font = "bold 48px serif";
+    ctx.textBaseline = "top";
+    ctx.shadowOffsetX = ctx.shadowOffsetY = ctx.shadowBlur = 0;
+    ctx.fillText("Hello", 100, 0);
+  }
 }
 
 class App extends zui.Widget {

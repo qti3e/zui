@@ -1,17 +1,14 @@
 import { BorderRadius } from "./style";
 
 /**
- *
  * @internal
  */
 export function rect(
-  ctx: CanvasRenderingContext2D,
+  ctx: Path2D,
   width: number,
   height: number,
   radius: BorderRadius
 ) {
-  ctx.beginPath();
-
   if (radius.isZero) {
     ctx.moveTo(0, 0);
     ctx.rect(0, 0, width, height);

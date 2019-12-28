@@ -1,5 +1,6 @@
 import { ZuiEmitter, ZuiReceiver } from "./types";
 import { Widget } from "./widget";
+import { Canvas } from "./canvas";
 
 type DFGEdge<T = unknown> = {
   emitter: ZuiEmitter<T>;
@@ -81,9 +82,13 @@ export function handleNextTick() {
     }
   }
 
+  // TODO(qti3e) Limit number of changedWidgets, if they are more than
+  // 7, re-draw the whole canvas.
+
   for (const widget of changedWidgets) {
     const parent = Widget.parentOf(widget);
     if (parent && changedWidgets.has(parent as any)) continue;
-    // Request redraw for the widget.
+    const canvas = Canvas.canvasOf(widget);
+    canvas?.drawWidget(widget);
   }
 }
