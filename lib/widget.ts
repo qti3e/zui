@@ -1,4 +1,6 @@
 import { Dimension, Point2D } from "./types";
+import { Canvas } from "./canvas";
+import { Color } from "./style";
 
 /**
  * A widget instance with a position.
@@ -10,16 +12,21 @@ export type WidgetPosition = {
 
 export abstract class Widget {
   /**
+   * The background of this widget.
+   */
+  background: Color = Color.Transparent;
+
+  /**
    * Maps every widget to its parent.
    */
-  private static readonly parents = new WeakMap<Widget, Widget>();
+  private static readonly parents = new WeakMap<Widget, Widget | Canvas>();
 
   /**
    * Return parent of a widget.
    *
    * @param widget The widget which we want to find its parent.
    */
-  static parentOf(widget: Widget): Widget | undefined {
+  static parentOf(widget: Widget): Widget | Canvas | undefined {
     return this.parents.get(widget);
   }
 

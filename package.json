@@ -1,0 +1,12 @@
+{
+  "name": "Zui",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "git@gitlab.com:Qti3e/zui.git",
+  "author": "Parsa Ghadimi <qti3eqti3e@gmail.com>",
+  "license": "MIT",
+  "typings": "dist/index.d.ts",
+  "devDependencies": {
+    "typescript": "^3.7.4"
+  }
+}
