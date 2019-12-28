@@ -1,6 +1,6 @@
 import { Dimension, Point2D } from "./types";
 import { Canvas } from "./canvas";
-import { Color } from "./style";
+import { ZuiStyle } from "./style";
 
 /**
  * A widget instance with a position.
@@ -12,9 +12,9 @@ export type WidgetPosition = {
 
 export abstract class Widget {
   /**
-   * The background of this widget.
+   * The widget style.
    */
-  background: Color = Color.Transparent;
+  style: ZuiStyle | undefined;
 
   /**
    * Maps every widget to its parent.

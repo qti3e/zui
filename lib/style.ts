@@ -131,6 +131,11 @@ export class Shadow {
  * corners.
  */
 export class BorderRadius {
+  /**
+   * Only true when all of the corners are set to zero.
+   */
+  readonly isZero: boolean;
+
   private constructor(
     /**
      * Top Left Width.
@@ -164,7 +169,17 @@ export class BorderRadius {
      * Bottom Left Height.
      */
     readonly blh: number
-  ) {}
+  ) {
+    this.isZero =
+      tlw === 0 &&
+      tlh === 0 &&
+      trw === 0 &&
+      trh === 0 &&
+      brw === 0 &&
+      brh === 0 &&
+      blw === 0 &&
+      blh === 0;
+  }
 
   /**
    * Creates a border radius for all corners.

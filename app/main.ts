@@ -1,14 +1,19 @@
 import * as zui from "../lib";
+import { ZuiStyle } from "../lib/style";
 
 // ---
 
 class Sidebar extends zui.Widget {
-  background = zui.Color.RGB(0xff, 0, 0);
+  style: ZuiStyle = {
+    background: zui.Color.RGBA(0xff, 0, 0, 1),
+    borderRadius: zui.BorderRadius.All(50, 100).add(zui.BorderRadius.TLBR(50)),
+    shadow: new zui.Shadow(0, 0, zui.Color.White, 5)
+  };
 
   getSize() {
     return {
-      width: 48,
-      height: window.innerHeight
+      width: 400,
+      height: 250
     };
   }
 
@@ -16,10 +21,12 @@ class Sidebar extends zui.Widget {
 }
 
 class App extends zui.Widget {
+  style: ZuiStyle = {};
+
   constructor() {
     super();
 
-    this.addChild(0, 0, new Sidebar());
+    this.addChild(100, 100, new Sidebar());
   }
 
   getSize() {
@@ -43,6 +50,7 @@ document.body.appendChild(canvas.domElement);
 canvas.domElement.style.position = "fixed";
 canvas.domElement.style.left = "0";
 canvas.domElement.style.top = "0";
+document.body.style.background = canvas.style.background.toString();
 
 zui.connect(
   zui.map(

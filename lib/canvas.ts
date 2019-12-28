@@ -1,6 +1,7 @@
 import { Widget, WidgetPosition } from "./widget";
 import { ZuiReceiver, Dimension, Point2D } from "./types";
-import { Color } from "./style";
+import { Color, ZuiStyle, Shadow, BorderRadius } from "./style";
+import { rect } from "./clip";
 
 export class ResizeEvent implements Dimension {
   constructor(readonly width: number, readonly height: number) {}
@@ -9,9 +10,16 @@ export class ResizeEvent implements Dimension {
 export type CanvasEvent = ResizeEvent;
 
 export type CanvasOptions = {
-  background?: Color;
   alpha?: boolean;
+  style?: ZuiStyle;
 };
+
+// The default style.
+const defaultStyle: Required<ZuiStyle> = Object.freeze({
+  background: Color.Grey,
+  shadow: Shadow.NoShadow,
+  borderRadius: BorderRadius.NoRadius
+});
 
 /**
  * The canvas.
@@ -33,9 +41,9 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
   readonly context: CanvasRenderingContext2D;
 
   /**
-   * Background color.
+   * The canvas global style.
    */
-  private background: Color;
+  readonly style: Readonly<Required<ZuiStyle>>;
 
   /**
    *
@@ -58,7 +66,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     this.domElement.width = width;
     this.domElement.height = height;
     // Apply options.
-    this.background = options?.background || Color.Grey;
+    this.style = { ...defaultStyle, ...options?.style };
   }
 
   receive(event: CanvasEvent) {
@@ -73,12 +81,23 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     this.domElement.width = this.width;
     this.domElement.height = this.height;
 
-    this.context.fillStyle = this.background.toString();
+    this.context.fillStyle = this.style.background.toString();
     this.context.fillRect(0, 0, this.width, this.height);
 
     for (const child of this.children) {
       this.draw(child.position, child.widget);
     }
+  }
+
+  private getStyle<K extends keyof ZuiStyle>(
+    widget: Widget,
+    key: K
+  ): NonNullable<ZuiStyle[K]> {
+    if (!widget.style) return this.style[key]!;
+
+    if (widget.style[key]) return widget.style[key]!;
+
+    return this.style[key]!;
   }
 
   private draw(position: Point2D, widget: Widget) {
@@ -87,21 +106,23 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     context.translate(position.x, position.y);
 
     const size = widget.getSize();
+    const shadow = this.getStyle(widget, "shadow");
+    const radius = this.getStyle(widget, "borderRadius");
 
-    // 0. Draw background.
-    context.shadowColor = "white";
-    context.shadowBlur = 15;
-    context.shadowOffsetX = 15;
-    context.fillStyle = widget.background.toString();
-    context.fillRect(0, 0, size.width, size.height);
+    // 0. Container & Background
+    context.shadowColor = shadow.color.toString();
+    context.shadowBlur = shadow.blur;
+    context.shadowOffsetX = shadow.offsetX;
+    context.shadowOffsetY = shadow.offsetY;
+    context.fillStyle = this.getStyle(widget, "background").toString();
+    rect(context, size.width, size.height, radius);
+    context.fill();
 
     // 1. Clip
-    context.beginPath();
-    context.moveTo(0, 0);
-    context.rect(0, 0, size.width, size.height);
+    rect(context, size.width, size.height, radius);
     context.clip();
 
-    // 2. Draw element.
+    // 1. Draw element.
     widget.draw();
 
     // 3. Draw children.
