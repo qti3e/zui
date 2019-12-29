@@ -18,7 +18,16 @@ export class Click implements Point2D {
   constructor(readonly x: number, readonly y: number) {}
 }
 
-export type CanvasEvent = ResizeEvent | MouseMove | Click;
+export class Wheel implements Point2D {
+  constructor(
+    readonly x: number,
+    readonly y: number,
+    readonly deltaX: number,
+    readonly deltaY: number
+  ) {}
+}
+
+export type CanvasEvent = ResizeEvent | MouseMove | Click | Wheel;
 
 export type CanvasOptions = {
   alpha?: boolean;
@@ -201,6 +210,17 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
         const x = event.x - box.left;
         const y = event.y - box.top;
         widget.handleClick!(x, y);
+      }
+    }
+
+    if (event instanceof Wheel) {
+      const widgets = this.findIntersectingWidgetsWithEvent(event, [
+        "handleWheel"
+      ]);
+
+      if (widgets.length) {
+        const widget = widgets[widgets.length - 1];
+        widget.handleWheel!(event.deltaX, event.deltaY);
       }
     }
   }
