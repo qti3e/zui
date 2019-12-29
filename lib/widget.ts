@@ -67,4 +67,30 @@ export abstract class Widget {
    * children.
    */
   afterDraw?(): void;
+
+  /**
+   * Handle mouse in event.
+   */
+  handleMouseIn?(): void;
+
+  /**
+   * Handle mouse out.
+   */
+  handleMouseOut?(): void;
+
+  /**
+   *
+   * @param x The x offset within the element.
+   * @param y The y offset within the element.
+   */
+  handleClick?(x: number, y: number): void;
+
+  /**
+   * The wheel event fires when the user rotates a wheel button on a pointing
+   * device (typically a mouse).
+   *
+   * @param deltaX A double representing the horizontal scroll amount.
+   * @param deltaY A double representing the vertical scroll amount.
+   */
+  handleWheel?(deltaX: number, deltaY: number): void;
 }

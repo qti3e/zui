@@ -14,6 +14,8 @@ export function iterator<T>(iter: Iterator<T>): ZuiEmitter<T> {
  * @internal
  */
 class IteratorHandler<T> implements ZuiEmitter<T> {
+  readonly maxPerFrame = 1;
+
   private done = false;
 
   constructor(readonly iter: Iterator<T>) {}

@@ -59,6 +59,7 @@ export function detach(node: ZuiReceiver | ZuiEmitter | Widget) {
  */
 export function handleNextTick() {
   const changedWidgets = new Set<Widget>();
+  const changedCanvases = new Set<Canvas>();
   let seen = new Set<ZuiEmitter>();
 
   for (let i = 0; i < DFG.length; ++i) {
@@ -67,9 +68,15 @@ export function handleNextTick() {
     if (seen.has(emitter)) continue;
     seen.add(emitter);
 
-    const data = emitter.poll();
+    const data: unknown[] = [];
 
-    if (data === undefined) continue;
+    let tmp = emitter.poll();
+    while (tmp !== undefined && data.length < emitter.maxPerFrame) {
+      data.push(tmp);
+      tmp = emitter.poll();
+    }
+
+    if (data.length === 0) continue;
 
     for (let j = i; j < DFG.length; ++j) {
       if (DFG[j].emitter !== emitter) continue;
@@ -77,18 +84,15 @@ export function handleNextTick() {
       if (receiver instanceof Widget) {
         changedWidgets.add(receiver);
       } else {
-        receiver.receive(data);
+        for (const d of data) receiver.receive(d);
       }
     }
   }
 
-  // TODO(qti3e) Limit number of changedWidgets, if they are more than
-  // 7, re-draw the whole canvas.
-
   for (const widget of changedWidgets) {
-    const parent = Widget.parentOf(widget);
-    if (parent && changedWidgets.has(parent as any)) continue;
     const canvas = Canvas.canvasOf(widget);
-    canvas?.drawWidget(widget);
+    if (canvas) changedCanvases.add(canvas);
   }
+
+  for (const canvas of changedCanvases) canvas.redraw();
 }

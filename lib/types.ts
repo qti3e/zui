@@ -3,6 +3,11 @@
  */
 export interface ZuiEmitter<T = unknown> {
   /**
+   * How many polls can we do at each frame.
+   */
+  maxPerFrame: number;
+
+  /**
    * Called to get the new data, if any.
    */
   poll(): T | undefined;

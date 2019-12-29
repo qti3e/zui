@@ -1,13 +1,24 @@
 import { Widget, WidgetPosition } from "./widget";
-import { ZuiReceiver, Dimension, Point2D } from "./types";
+import { ZuiReceiver, Dimension, Point2D, BoundingBox } from "./types";
 import { Color, ZuiStyle, Shadow, BorderRadius, Background } from "./style";
 import { rect } from "./clip";
+import { event } from "./event";
+import { iterate } from "./iterate";
+import { combine } from "./combine";
 
 export class ResizeEvent implements Dimension {
   constructor(readonly width: number, readonly height: number) {}
 }
 
-export type CanvasEvent = ResizeEvent;
+export class MouseMove implements Point2D {
+  constructor(readonly x: number, readonly y: number) {}
+}
+
+export class Click implements Point2D {
+  constructor(readonly x: number, readonly y: number) {}
+}
+
+export type CanvasEvent = ResizeEvent | MouseMove | Click;
 
 export type CanvasOptions = {
   alpha?: boolean;
@@ -15,14 +26,13 @@ export type CanvasOptions = {
 };
 
 type RenderedWidgetData = {
-  position: Point2D;
   clip: Path2D;
-  size: Dimension;
+  boundingBox: BoundingBox;
 };
 
 // The default style.
 const defaultStyle: Required<ZuiStyle> = Object.freeze({
-  background: Color.Grey,
+  background: Color.Transparent,
   shadow: Shadow.NoShadow,
   borderRadius: BorderRadius.NoRadius
 });
@@ -65,6 +75,12 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
    * Current translate y.
    */
   private translateY = 0;
+
+  /**
+   * Previous intersecting widgets that had either handleMouseIn or
+   * handleMouseOut.
+   */
+  private mouseInOut: Widget[] = [];
 
   /**
    * Cache widgets to canvases.
@@ -111,11 +127,81 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     this.style = { ...defaultStyle, ...options?.style };
   }
 
+  private findIntersectingWidgetsWithEvent(
+    position: Point2D,
+    event: (
+      | "handleMouseIn"
+      | "handleMouseOut"
+      | "handleClick"
+      | "handleWheel"
+    )[]
+  ): Widget[] {
+    if (event.length < 1 || event.length > 4)
+      throw new Error("Unexpected argument passed.");
+
+    const isInBoundingBox = (box: BoundingBox) =>
+      position.x >= box.left &&
+      position.x <= box.right &&
+      position.y >= box.top &&
+      position.y <= box.bottom;
+
+    const result: Widget[] = [];
+
+    const toSee = this.children.slice();
+    for (const { widget } of toSee) {
+      const data = this.widgetsData.get(widget);
+      if (data && isInBoundingBox(data.boundingBox)) {
+        toSee.push(...widget.children);
+        if (
+          (event[0] && widget[event[0]]) ||
+          (event[1] && widget[event[1]]) ||
+          (event[2] && widget[event[2]]) ||
+          (event[3] && widget[event[3]])
+        )
+          result.push(widget);
+      }
+    }
+
+    return result;
+  }
+
   receive(event: CanvasEvent) {
     if (event instanceof ResizeEvent) {
       this.width = event.width;
       this.height = event.height;
       this.redraw();
+    }
+
+    if (event instanceof MouseMove) {
+      const mouseInOut = this.findIntersectingWidgetsWithEvent(event, [
+        "handleMouseIn",
+        "handleMouseOut"
+      ]);
+
+      // Fire mouse out event.
+      for (const x of this.mouseInOut)
+        if (x.handleMouseOut && mouseInOut.indexOf(x) < 0) x.handleMouseOut();
+
+      // Fire mouse in event.
+      for (const x of mouseInOut)
+        if (x.handleMouseIn && this.mouseInOut.indexOf(x) < 0)
+          x.handleMouseIn();
+
+      this.mouseInOut = mouseInOut;
+    }
+
+    if (event instanceof Click) {
+      const widgets = this.findIntersectingWidgetsWithEvent(event, [
+        "handleClick"
+      ]);
+
+      if (widgets.length) {
+        const widget = widgets[widgets.length - 1];
+        const box = this.widgetsData.get(widget)!.boundingBox;
+        const x = event.x - box.left;
+        const y = event.y - box.top;
+        widget.handleClick!(x, y);
+      }
     }
   }
 
@@ -147,7 +233,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     context.save();
     context.translate(position.x, position.y);
     this.translateX += position.x;
-    this.translateY += position.x;
+    this.translateY += position.y;
 
     const size = widget.getSize();
     const shadow = this.getStyle(widget, "shadow");
@@ -159,12 +245,13 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
 
     // Save the data of this widget.
     this.widgetsData.set(widget, {
-      position: {
-        x: this.translateX,
-        y: this.translateY
+      boundingBox: {
+        left: this.translateX,
+        right: this.translateX + size.width,
+        top: this.translateY,
+        bottom: this.translateY + size.height
       },
-      clip,
-      size
+      clip
     });
 
     // Store this.
@@ -190,77 +277,9 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
 
     context.restore();
     this.translateX -= position.x;
-    this.translateY -= position.x;
+    this.translateY -= position.y;
 
     // Call afterDraw.
     if (widget.afterDraw) widget.afterDraw();
-  }
-
-  drawWidget(widget: Widget) {
-    const data = this.widgetsData.get(widget);
-
-    // If this is a top level widget, render it using draw method.
-    if (data && Widget.parentOf(widget) === this)
-      return this.draw(data.position, widget);
-
-    // If it's not rendered already and we do not have enough data to re-render
-    // try rendering its parent instead.
-    if (!data) {
-      const parent = Widget.parentOf(widget);
-      if (parent instanceof Canvas)
-        throw new Error("Widget belongs to another canvas.");
-      else if (parent) this.drawWidget(parent);
-      return;
-    }
-
-    const { context } = this;
-    context.save();
-
-    // Collect parents to have the right clipping, we want to keep changes
-    // in the current widget.
-
-    // From current element to a top-level one.
-    const hierarchy: Widget[] = [];
-    const backgrounds: Background[] = [];
-    let nonAlphaIndex = -1;
-
-    for (
-      let current: Canvas | Widget | undefined = widget;
-      current instanceof Widget;
-      current = Widget.parentOf(widget)
-    ) {
-      const { position, clip } = this.widgetsData.get(current)!;
-      // Get the background.
-      const background = this.getStyle(widget, "background");
-      backgrounds.push(background);
-      hierarchy.push(current);
-      // Clip.
-      context.translate(position.x, position.y);
-      context.clip(clip);
-      context.translate(-position.x, -position.y);
-      // Find the first parent with a full color background.
-      if (nonAlphaIndex < 0) {
-        if (background instanceof Color && background.alpha === 1) {
-          nonAlphaIndex = backgrounds.length - 1;
-        }
-      }
-    }
-
-    // Now render backgrounds, i > 0: We don't want to render the current widget.
-    for (
-      let i = hierarchy.length - 1;
-      i > Math.max(nonAlphaIndex - 1, 0);
-      --i
-    ) {
-      const widget = hierarchy[i];
-      const { position, size } = this.widgetsData.get(widget)!;
-      context.fillStyle = this.getStyle(widget, "background").toString();
-      context.fillRect(position.x, position.y, size.width, size.height);
-    }
-
-    // Redraw the element.
-    this.draw(data.position, widget);
-
-    context.restore();
   }
 }

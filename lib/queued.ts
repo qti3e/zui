@@ -4,6 +4,8 @@ import { ZuiEmitter, ZuiReceiver } from "./types";
  * @internal
  */
 export abstract class Queued<I, O> implements ZuiEmitter<O>, ZuiReceiver<I> {
+  maxPerFrame: number = Infinity;
+
   private queue: O[] = [];
 
   protected enqueue(data: O) {
