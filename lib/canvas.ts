@@ -1,10 +1,7 @@
 import { Widget, WidgetPosition } from "./widget";
 import { ZuiReceiver, Dimension, Point2D, BoundingBox } from "./types";
-import { Color, ZuiStyle, Shadow, BorderRadius, Background } from "./style";
+import { Color, ZuiStyle, Shadow, BorderRadius } from "./style";
 import { rect } from "./clip";
-import { event } from "./event";
-import { iterate } from "./iterate";
-import { combine } from "./combine";
 
 export class ResizeEvent implements Dimension {
   constructor(readonly width: number, readonly height: number) {}
@@ -255,24 +252,23 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     this.translateX += position.x;
     this.translateY += position.y;
 
-    const size = widget.getSize();
+    const width = widget.width.valueOf();
+    const height = widget.height.valueOf();
     const shadow = this.getStyle(widget, "shadow");
     const radius = this.getStyle(widget, "borderRadius");
+    const boundingBox = {
+      left: this.translateX,
+      right: this.translateX + width,
+      top: this.translateY,
+      bottom: this.translateY + height
+    };
 
     // Construct the clip.
     const clip = new Path2D();
-    rect(clip, size.width, size.height, radius);
+    rect(clip, width, height, radius);
 
     // Save the data of this widget.
-    this.widgetsData.set(widget, {
-      boundingBox: {
-        left: this.translateX,
-        right: this.translateX + size.width,
-        top: this.translateY,
-        bottom: this.translateY + size.height
-      },
-      clip
-    });
+    this.widgetsData.set(widget, { boundingBox, clip });
 
     // Store this.
     Canvas.widgetsToCanvasMap.set(widget, this);
@@ -292,8 +288,16 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     widget.draw(context);
 
     // 3. Draw children.
-    for (const child of widget.children)
+    for (const child of widget.children) {
+      if (
+        child.position.x > width ||
+        child.position.y > height ||
+        child.position.x + child.widget.width.valueOf() < 0 ||
+        child.position.y + child.widget.height.valueOf() < 0
+      )
+        continue;
       this.draw(child.position, child.widget);
+    }
 
     context.restore();
     this.translateX -= position.x;

@@ -1,6 +1,7 @@
-import { Dimension, Point2D } from "./types";
+import { Point2D } from "./types";
 import { Canvas } from "./canvas";
 import { ZuiStyle } from "./style";
+import { Reactive } from "./reactive";
 
 /**
  * A widget instance with a position.
@@ -53,9 +54,14 @@ export abstract class Widget {
   }
 
   /**
-   * Should return the size which this widget requires.
+   * Width of this widget.
    */
-  abstract getSize(): Dimension;
+  abstract readonly width: number | Reactive<number>;
+
+  /**
+   * Height of this widget.
+   */
+  abstract readonly height: number | Reactive<number>;
 
   /**
    * Draw the widget.

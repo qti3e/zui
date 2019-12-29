@@ -8,7 +8,7 @@ export { event } from "./event";
 export { Reactive } from "./reactive";
 export { Widget } from "./widget";
 export { Canvas, ResizeEvent, MouseMove, Click, Wheel } from "./canvas";
-export { Stack } from "./stack";
+export { pageWidth, pageHeight } from "./dimension";
 export {
   Color,
   ZuiStyle,
@@ -17,3 +17,4 @@ export {
   LinearGradient,
   Shadow
 } from "./style";
+export { Icon } from "./icon";

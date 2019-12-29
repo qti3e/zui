@@ -1,14 +1,17 @@
-import { ZuiEmitter } from "./types";
+import { ZuiEmitter, ZuiReceiver } from "./types";
+import { Widget } from "./widget";
+import { connect } from "./DFG";
 
-export class Reactive<T> implements ZuiEmitter<T> {
+export class Reactive<T> implements ZuiEmitter<T>, ZuiReceiver<T> {
   maxPerFrame = 1;
 
   private value: T;
 
   private changed = false;
 
-  constructor(init: T) {
+  constructor(init: T, widget?: Widget) {
     this.value = init;
+    if (widget) connect(this, widget);
   }
 
   poll() {
@@ -29,5 +32,9 @@ export class Reactive<T> implements ZuiEmitter<T> {
 
   valueOf() {
     return this.value;
+  }
+
+  receive(value: T) {
+    this.set(value);
   }
 }
