@@ -13,21 +13,20 @@ export class Text {
     defaultTextStyle: Readonly<Required<ZuiTextStyle>>,
     x: number,
     y: number
-  ) {
+  ): void {
     const cache = this.cache.get(defaultTextStyle);
-    if (cache) {
-      ctx.drawImage(cache, x, y - 15);
-      return;
-    }
+    if (cache)
+      return ctx.drawImage(cache, x, y - 15);
 
     const canvas = document.createElement("canvas");
     const canvasCtx = canvas.getContext("2d")!;
     this.cache.set(defaultTextStyle, canvas);
 
     const shadow = this.style?.shadow || defaultTextStyle.shadow;
-    const font = this.style?.font || defaultTextStyle.font;
+    const fontName = this.style?.font || defaultTextStyle.font;
     const fontSize = this.style?.fontSize || defaultTextStyle.fontSize;
-    canvasCtx.font = `${fontSize}px ${font}`;
+    const font = `${fontSize}px ${fontName}`;
+    canvasCtx.font = font;
 
     const size = canvasCtx.measureText(this.text);
     const sizeM = canvasCtx.measureText("M");
@@ -35,7 +34,7 @@ export class Text {
     canvas.height = sizeM.width * 1.75 + 15;
 
     // Again.
-    canvasCtx.font = `${fontSize}px ${font}`;
+    canvasCtx.font = font;
     canvasCtx.fillStyle = (
       this.style?.color || defaultTextStyle.color
     ).toString();
@@ -47,6 +46,5 @@ export class Text {
 
     canvasCtx.fillText(this.text, 0, 15);
     this.render(ctx, defaultTextStyle, x, y);
-    document.body.appendChild(canvas);
   }
 }

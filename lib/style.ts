@@ -42,6 +42,17 @@ export class Color {
   }
 
   /**
+   * Returns the color from a 0xrrggbb number. (0xrgb is not supported.)
+   * @param hex The hex number representing the color as a 6-digit hex number.
+   */
+  static HEX(hex: number, opacity = 1) {
+    const r = hex >> 16;
+    const g = hex >> 8 & 0xff;
+    const b = hex & 0xff;
+    return new Color(r, g, b, opacity);
+  }
+
+  /**
    * A full transparent color.
    */
   static Transparent = new Color(0, 0, 0, 0);

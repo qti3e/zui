@@ -31,13 +31,17 @@ class SidebarButton extends Widget {
   }
 
   handleMouseIn() {
-    this.style.background = Color.RGBA(0xfd, 0x70, 0x14, 0.7);
+    this.style.background = Color.HEX(0xfd7014, 0.7);
     this.updater.set(Math.random());
   }
 
   handleMouseOut() {
     this.style.background = Color.Transparent;
     this.updater.set(Math.random());
+  }
+
+  handleClick() {
+    alert("X");
   }
 }
 

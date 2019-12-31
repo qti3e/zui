@@ -32,7 +32,7 @@ export class Painter {
   drawZuiPath(
     x: number,
     y: number,
-    path: Readonly<Float32Array | Int16Array>,
+    path: Readonly<Int16Array | Int8Array | Int32Array>,
     scale = 1,
     lineWidth = 3,
     color: Color = Color.White
@@ -42,7 +42,7 @@ export class Painter {
     ctx.lineWidth = lineWidth;
     ctx.beginPath();
 
-    loop: for (let i = 0; ; ) {
+    loop: for (let i = 0; ;) {
       const m = path[i++];
       switch (m) {
         // moveTo followed by a bezierCurveTo

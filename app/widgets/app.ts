@@ -42,7 +42,7 @@ export class App extends Widget {
 
   private t = new Text("🌏 Earth", {
     fontSize: 50,
-    color: Color.RGB(0xff, 0xff, 0xff)
+    color: Color.HEX(0xfd7014)
   });
 
   draw(painter: Painter) {

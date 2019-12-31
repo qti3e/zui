@@ -197,7 +197,8 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     if (event instanceof MouseMove) {
       const mouseInOut = this.findIntersectingWidgetsWithEvent(event, [
         "handleMouseIn",
-        "handleMouseOut"
+        "handleMouseOut",
+        "handleClick"
       ]);
 
       // Fire mouse out event.
@@ -205,9 +206,17 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
         if (x.handleMouseOut && mouseInOut.indexOf(x) < 0) x.handleMouseOut();
 
       // Fire mouse in event.
-      for (const x of mouseInOut)
+      let clickable = false;
+      for (const x of mouseInOut) {
         if (x.handleMouseIn && this.mouseInOut.indexOf(x) < 0)
           x.handleMouseIn();
+        if (x.handleClick)
+          clickable = true;
+      }
+
+      const style = this.domElement.style;
+      const cursor = clickable ? "pointer" : "default";
+      if (style.cursor !== cursor) style.cursor = cursor;
 
       this.mouseInOut = mouseInOut;
     }
