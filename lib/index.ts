@@ -17,4 +17,5 @@ export {
   LinearGradient,
   Shadow
 } from "./style";
-export { Icon } from "./icon";
+export { Spline } from "./spline";
+export { Painter } from "./painter";

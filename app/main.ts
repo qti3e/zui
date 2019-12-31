@@ -12,7 +12,7 @@ document.body.appendChild(canvas.domElement);
 canvas.domElement.style.position = "fixed";
 canvas.domElement.style.left = "0";
 canvas.domElement.style.top = "0";
-document.body.style["overscrollBehavior"] = "none";
+document.body.style["overscrollBehavior" as any] = "none";
 
 zui.connect(
   zui.combine(

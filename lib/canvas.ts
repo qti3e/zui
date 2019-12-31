@@ -2,6 +2,7 @@ import { Widget, WidgetPosition } from "./widget";
 import { ZuiReceiver, Dimension, Point2D, BoundingBox } from "./types";
 import { Color, ZuiStyle, Shadow, BorderRadius } from "./style";
 import { rect } from "./clip";
+import { Painter } from "./painter";
 
 export class ResizeEvent implements Dimension {
   constructor(readonly width: number, readonly height: number) {}
@@ -285,7 +286,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     context.clip(clip);
 
     // 1. Draw element.
-    widget.draw(context);
+    widget.draw(new Painter(context, this.translateX, this.translateY));
 
     // 3. Draw children.
     for (const child of widget.children) {

@@ -2,6 +2,7 @@ import { Point2D } from "./types";
 import { Canvas } from "./canvas";
 import { ZuiStyle } from "./style";
 import { Reactive } from "./reactive";
+import { Painter } from "./painter";
 
 /**
  * A widget instance with a position.
@@ -66,7 +67,7 @@ export abstract class Widget {
   /**
    * Draw the widget.
    */
-  abstract draw(ctx: CanvasRenderingContext2D): void;
+  abstract draw(ctx: Painter): void;
 
   /**
    * It will be called after the draw of the current element and all of its

@@ -332,3 +332,28 @@ export type ZuiStyle = {
    */
   borderRadius?: BorderRadius;
 };
+
+/**
+ * A style that can be applied to a text.
+ */
+export type ZuiTextStyle = {
+  /**
+   * The text color.
+   */
+  color?: Color;
+
+  /**
+   * Text shadow.
+   */
+  shadow?: Shadow;
+
+  /**
+   * The text font.
+   */
+  font?: string;
+
+  /**
+   * Font size.
+   */
+  fontSize?: number;
+};
