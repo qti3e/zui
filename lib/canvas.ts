@@ -1,6 +1,6 @@
 import { Widget, WidgetPosition } from "./widget";
 import { ZuiReceiver, Dimension, Point2D, BoundingBox } from "./types";
-import { Color, ZuiStyle, Shadow, BorderRadius } from "./style";
+import { Color, ZuiStyle, Shadow, BorderRadius, ZuiTextStyle } from "./style";
 import { rect } from "./clip";
 import { Painter } from "./painter";
 
@@ -30,6 +30,7 @@ export type CanvasEvent = ResizeEvent | MouseMove | Click | Wheel;
 export type CanvasOptions = {
   alpha?: boolean;
   style?: ZuiStyle;
+  textStyle?: ZuiTextStyle;
 };
 
 type RenderedWidgetData = {
@@ -42,6 +43,14 @@ const defaultStyle: Required<ZuiStyle> = Object.freeze({
   background: Color.Transparent,
   shadow: Shadow.NoShadow,
   borderRadius: BorderRadius.NoRadius
+});
+
+// The default text style.
+const defaultTextStyle: Required<ZuiTextStyle> = Object.freeze({
+  color: Color.Black,
+  shadow: Shadow.NoShadow,
+  font: "Arial",
+  fontSize: 12
 });
 
 /**
@@ -67,6 +76,11 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
    * The canvas global style.
    */
   readonly style: Readonly<Required<ZuiStyle>>;
+
+  /**
+   * The default text style.
+   */
+  readonly defaultTextStyle: Readonly<Required<ZuiTextStyle>>;
 
   /**
    * Last absolute position and size of every child in the current canvas.
@@ -132,6 +146,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     this.domElement.height = height;
     // Apply options.
     this.style = { ...defaultStyle, ...options?.style };
+    this.defaultTextStyle = { ...defaultTextStyle, ...options?.textStyle };
   }
 
   private findIntersectingWidgetsWithEvent(
@@ -286,7 +301,14 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     context.clip(clip);
 
     // 1. Draw element.
-    widget.draw(new Painter(context, this.translateX, this.translateY));
+    widget.draw(
+      new Painter(
+        context,
+        this.translateX,
+        this.translateY,
+        this.defaultTextStyle
+      )
+    );
 
     // 3. Draw children.
     for (const child of widget.children) {

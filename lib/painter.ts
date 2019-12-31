@@ -1,27 +1,16 @@
 import { Reactive } from "./reactive";
 import { ZuiTextStyle, Color } from "./style";
+import { Text } from "./text";
 
 type Pixel = number | Reactive<number>;
-
-export class Text {
-  constructor(text: string, style?: ZuiTextStyle) {}
-}
 
 export class Painter {
   constructor(
     private readonly backend: CanvasRenderingContext2D,
     private readonly translateX: number,
     private readonly translateY: number,
-    private readonly defaultTextStyle: ZuiTextStyle
+    private readonly defaultTextStyle: Required<ZuiTextStyle>
   ) {}
-
-  moveTo(x: Pixel, y: Pixel) {
-    this.backend.moveTo(x.valueOf(), y.valueOf());
-  }
-
-  lineTo(x: Pixel, y: Pixel) {
-    this.backend.lineTo(x.valueOf(), y.valueOf());
-  }
 
   getImageData(sx: Pixel, sy: Pixel, width: Pixel, height: Pixel): ImageData {
     return this.backend.getImageData(
@@ -85,5 +74,17 @@ export class Painter {
       }
     }
     ctx.stroke();
+  }
+
+  drawText(x: number, y: number, text: Text) {
+    text.render(this.backend, this.defaultTextStyle, x, y);
+  }
+
+  moveTo(x: Pixel, y: Pixel) {
+    this.backend.moveTo(x.valueOf(), y.valueOf());
+  }
+
+  lineTo(x: Pixel, y: Pixel) {
+    this.backend.lineTo(x.valueOf(), y.valueOf());
   }
 }

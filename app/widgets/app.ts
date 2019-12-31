@@ -10,6 +10,7 @@ import {
 } from "../../lib";
 import { Sidebar } from "./sidebar";
 import icon from "../icons/chess-king.svg";
+import { Text } from "../../lib/text";
 
 export class App extends Widget {
   style: ZuiStyle = {
@@ -39,8 +40,14 @@ export class App extends Widget {
     this.addChild(0, 0, new Sidebar());
   }
 
+  private t = new Text("🌏 Earth", {
+    fontSize: 50,
+    color: Color.RGB(0xff, 0xff, 0xff)
+  });
+
   draw(painter: Painter) {
     painter.drawZuiPath(200, 800, this.p.getPath(), 10);
+    painter.drawText(100, 100, this.t);
   }
 }
 
