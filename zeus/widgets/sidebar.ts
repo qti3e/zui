@@ -6,11 +6,8 @@ import {
   Shadow,
   Reactive,
   Painter
-} from "../../lib";
-import Smiley from "../icons/regular/grin-tongue-wink.svg";
-import Smiley2 from "../icons/regular/grin-hearts.svg";
-
-import grin from "../icons/grin-hearts.svg";
+} from "../../zui";
+import grin from "../../icons/grin-hearts.svg";
 
 class SidebarButton extends Widget {
   private readonly updater = new Reactive(0, this);

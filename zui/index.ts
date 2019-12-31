@@ -19,3 +19,4 @@ export {
 } from "./style";
 export { Spline } from "./spline";
 export { Painter } from "./painter";
+export { Text } from "./text";

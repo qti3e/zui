@@ -11,8 +11,9 @@
     "strict": true,
     "declaration": true,
     "declarationMap": true,
+    "noEmit": true,
     "outDir": "dist"
   },
-  "include": ["lib/**/*", "app/**/*"],
+  "include": ["zui/**/*", "zeus/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts", "**/*.svg.ts"]
 }

@@ -1,4 +1,4 @@
-import * as zui from "../lib";
+import * as zui from "../zui";
 import { App } from "./widgets/app";
 
 // Create canvas.

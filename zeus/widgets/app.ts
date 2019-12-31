@@ -6,11 +6,10 @@ import {
   Color,
   connect,
   Painter,
-  Spline
-} from "../../lib";
+  Spline,
+  Text
+} from "../../zui";
 import { Sidebar } from "./sidebar";
-import icon from "../icons/chess-king.svg";
-import { Text } from "../../lib/text";
 
 export class App extends Widget {
   style: ZuiStyle = {
