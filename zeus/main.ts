@@ -26,6 +26,14 @@ zui.connect(
       event => new zui.ZuiClickEvent(event.x, event.y)
     ),
     zui.map(
+      zui.event("mousedown", canvas.domElement),
+      event => new zui.ZuiMouseDownEvent(event.x, event.y)
+    ),
+    zui.map(
+      zui.event("mouseup", canvas.domElement),
+      event => new zui.ZuiMouseUpEvent(event.x, event.y)
+    ),
+    zui.map(
       zui.event("mousemove", canvas.domElement),
       event => new zui.ZuiMouseMoveEvent(event.x, event.y)
     ),

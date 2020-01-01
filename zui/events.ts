@@ -4,6 +4,14 @@ export class ZuiResizeEvent implements Dimension {
   constructor(readonly width: number, readonly height: number) {}
 }
 
+export class ZuiMouseDownEvent implements Point2D {
+  constructor(readonly x: number, readonly y: number) {}
+}
+
+export class ZuiMouseUpEvent implements Point2D {
+  constructor(readonly x: number, readonly y: number) {}
+}
+
 export class ZuiMouseMoveEvent implements Point2D {
   constructor(readonly x: number, readonly y: number) {}
 }
@@ -21,4 +29,10 @@ export class ZuiWheelEvent implements Point2D {
   ) {}
 }
 
-export type CanvasEvent = ZuiResizeEvent | ZuiMouseMoveEvent | ZuiClickEvent | ZuiWheelEvent;
+export type CanvasEvent =
+  | ZuiResizeEvent
+  | ZuiMouseDownEvent
+  | ZuiMouseUpEvent
+  | ZuiMouseMoveEvent
+  | ZuiClickEvent
+  | ZuiWheelEvent;

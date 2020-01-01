@@ -1,3 +1,5 @@
+import { Reactive } from "./reactive";
+
 /**
  * An emitter.
  */
@@ -39,6 +41,14 @@ export interface Dimension {
 export interface Point2D {
   x: number;
   y: number;
+}
+
+/**
+ * A reactive 2D point.
+ */
+export interface ReactivePoint2D {
+  x: Reactive<number> | number;
+  y: Reactive<number> | number;
 }
 
 export interface BoundingBox {

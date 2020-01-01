@@ -1,4 +1,4 @@
-import { Widget, sub, pageWidth, pageHeight, ZuiStyle, Color, BorderRadius, Shadow } from "../../../zui";
+import { Widget, sub, pageWidth, pageHeight, ZuiStyle, Color, BorderRadius, Shadow, Controller } from "../../../zui";
 
 export class TypeNode extends Widget {
   width = 300;
@@ -14,15 +14,30 @@ export class TypeNode extends Widget {
   handleClick() {}
 }
 
+export class TypesEditorView extends Widget {
+  width = 5000;
+  height = 3000;
+
+  constructor() {
+    super();
+    this.addChild(0, 0, new TypeNode());
+    this.addChild(200, 100, new TypeNode());
+    this.addChild(2500, 100, new TypeNode());
+    this.addChild(4700, 100, new TypeNode());
+    this.addChild(4700, 2950, new TypeNode());
+  }
+
+  draw() { }
+
+}
+
 export class TypesEditor extends Widget{
   width = sub(pageWidth, 48, this);
   height = pageHeight;
 
   constructor() {
     super();
-
-    this.addChild(-80, 20, new TypeNode());
-    this.addChild(200, 100, new TypeNode());
+    this.addChild(0, 0, new Controller(this.width, this.height, new TypesEditorView()));
   }
 
   draw() {}

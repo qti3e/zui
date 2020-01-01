@@ -9,6 +9,8 @@ type DFGEdge<T = unknown> = {
 
 let DFG: DFGEdge[] = [];
 
+(window as any)["zuiDFG"] = DFG;
+
 /**
  * Connect an emitter to a widget, it will make the widget be redrawn every time
  * emitter emits a new data.

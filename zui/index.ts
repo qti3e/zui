@@ -15,3 +15,4 @@ export * from "./painter";
 export * from "./text";
 export * from "./math";
 export * from "./events";
+export * from "./controller";

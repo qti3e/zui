@@ -8,7 +8,8 @@ import {
   ZuiMouseMoveEvent,
   ZuiClickEvent,
   ZuiWheelEvent,
-  CanvasEvent
+  CanvasEvent,
+  ZuiMouseDownEvent
 } from "./events";
 
 export type CanvasOptions = {
@@ -233,6 +234,9 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
         widget.handleWheel!(event.deltaX, event.deltaY);
       }
     }
+
+    if (event instanceof ZuiMouseDownEvent) {
+    }
   }
 
   redraw() {
@@ -243,7 +247,9 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     this.context.fillRect(0, 0, this.width, this.height);
 
     for (const child of this.children) {
-      this.draw(child.position, child.widget);
+      const x = child.position.x.valueOf();
+      const y = child.position.y.valueOf();
+      this.draw({ x, y }, child.widget);
     }
   }
 
@@ -309,14 +315,16 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
 
     // 3. Draw children.
     for (const child of widget.children) {
+      const x = child.position.x.valueOf();
+      const y = child.position.y.valueOf();
       if (
-        child.position.x > width ||
-        child.position.y > height ||
-        child.position.x + child.widget.width.valueOf() < 0 ||
-        child.position.y + child.widget.height.valueOf() < 0
+        x > width ||
+        y > height ||
+        x + child.widget.width.valueOf() < 0 ||
+        y + child.widget.height.valueOf() < 0
       )
         continue;
-      this.draw(child.position, child.widget);
+      this.draw({ x, y }, child.widget);
     }
 
     context.restore();

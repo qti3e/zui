@@ -1,14 +1,15 @@
-import { Point2D } from "./types";
+import { ReactivePoint2D } from "./types";
 import { Canvas } from "./canvas";
 import { ZuiStyle } from "./style";
 import { Reactive } from "./reactive";
 import { Painter } from "./painter";
+import { connect } from "./DFG";
 
 /**
  * A widget instance with a position.
  */
 export type WidgetPosition = {
-  position: Point2D;
+  position: ReactivePoint2D;
   widget: Widget;
 };
 
@@ -45,13 +46,20 @@ export abstract class Widget {
    * @param y The y offset of the widget.
    * @param widget Widget which we want to add to the current widget as a child.
    */
-  protected addChild(x: number, y: number, widget: Widget) {
+  protected addChild(
+    x: number | Reactive<number>,
+    y: number | Reactive<number>,
+    widget: Widget
+  ) {
     const currentParent = Widget.parentOf(widget);
     if (currentParent !== this && currentParent !== undefined)
       throw new Error("Widget is already in use.");
 
     Widget.parents.set(widget, this);
     Set.prototype.add.call(this.children, { widget, position: { x, y } });
+
+    if (x instanceof Reactive) connect(x, this);
+    if (y instanceof Reactive) connect(y, this);
   }
 
   /**
@@ -84,6 +92,12 @@ export abstract class Widget {
    * Handle mouse out.
    */
   handleMouseOut?(): void;
+
+  handleMouseDown?(x: number, y: number): void;
+
+  handleMouseUp?(x: number, y: number): void;
+
+  handleMouseMove?(x: number, y: number): void;
 
   /**
    *
