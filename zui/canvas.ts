@@ -1,31 +1,15 @@
 import { Widget, WidgetPosition } from "./widget";
-import { ZuiReceiver, Dimension, Point2D, BoundingBox } from "./types";
+import { ZuiReceiver, Point2D, BoundingBox } from "./types";
 import { Color, ZuiStyle, Shadow, BorderRadius, ZuiTextStyle } from "./style";
 import { rect } from "./clip";
 import { Painter } from "./painter";
-
-export class ResizeEvent implements Dimension {
-  constructor(readonly width: number, readonly height: number) {}
-}
-
-export class MouseMove implements Point2D {
-  constructor(readonly x: number, readonly y: number) {}
-}
-
-export class Click implements Point2D {
-  constructor(readonly x: number, readonly y: number) {}
-}
-
-export class Wheel implements Point2D {
-  constructor(
-    readonly x: number,
-    readonly y: number,
-    readonly deltaX: number,
-    readonly deltaY: number
-  ) {}
-}
-
-export type CanvasEvent = ResizeEvent | MouseMove | Click | Wheel;
+import {
+  ZuiResizeEvent,
+  ZuiMouseMoveEvent,
+  ZuiClickEvent,
+  ZuiWheelEvent,
+  CanvasEvent
+} from "./events";
 
 export type CanvasOptions = {
   alpha?: boolean;
@@ -141,12 +125,17 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     options?: CanvasOptions
   ) {
     this.domElement = document.createElement("canvas");
-    this.context = this.domElement.getContext("2d", { alpha: options?.alpha })!;
+    this.context = this.domElement.getContext("2d", {
+      alpha: options && options.alpha
+    })!;
     this.domElement.width = width;
     this.domElement.height = height;
     // Apply options.
-    this.style = { ...defaultStyle, ...options?.style };
-    this.defaultTextStyle = { ...defaultTextStyle, ...options?.textStyle };
+    this.style = { ...defaultStyle, ...(options && options.style) };
+    this.defaultTextStyle = {
+      ...defaultTextStyle,
+      ...(options && options.textStyle)
+    };
   }
 
   private findIntersectingWidgetsWithEvent(
@@ -188,13 +177,13 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
   }
 
   receive(event: CanvasEvent) {
-    if (event instanceof ResizeEvent) {
+    if (event instanceof ZuiResizeEvent) {
       this.width = event.width;
       this.height = event.height;
       this.redraw();
     }
 
-    if (event instanceof MouseMove) {
+    if (event instanceof ZuiMouseMoveEvent) {
       const mouseInOut = this.findIntersectingWidgetsWithEvent(event, [
         "handleMouseIn",
         "handleMouseOut",
@@ -210,8 +199,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       for (const x of mouseInOut) {
         if (x.handleMouseIn && this.mouseInOut.indexOf(x) < 0)
           x.handleMouseIn();
-        if (x.handleClick)
-          clickable = true;
+        if (x.handleClick) clickable = true;
       }
 
       const style = this.domElement.style;
@@ -221,7 +209,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       this.mouseInOut = mouseInOut;
     }
 
-    if (event instanceof Click) {
+    if (event instanceof ZuiClickEvent) {
       const widgets = this.findIntersectingWidgetsWithEvent(event, [
         "handleClick"
       ]);
@@ -235,7 +223,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       }
     }
 
-    if (event instanceof Wheel) {
+    if (event instanceof ZuiWheelEvent) {
       const widgets = this.findIntersectingWidgetsWithEvent(event, [
         "handleWheel"
       ]);

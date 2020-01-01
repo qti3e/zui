@@ -18,19 +18,20 @@ zui.connect(
   zui.combine(
     zui.map(
       zui.event("wheel", canvas.domElement),
-      event => new zui.Wheel(event.x, event.y, event.deltaX, event.deltaY)
+      event =>
+        new zui.ZuiWheelEvent(event.x, event.y, event.deltaX, event.deltaY)
     ),
     zui.map(
       zui.event("click", canvas.domElement),
-      event => new zui.Click(event.x, event.y)
+      event => new zui.ZuiClickEvent(event.x, event.y)
     ),
     zui.map(
       zui.event("mousemove", canvas.domElement),
-      event => new zui.MouseMove(event.x, event.y)
+      event => new zui.ZuiMouseMoveEvent(event.x, event.y)
     ),
     zui.map(
       zui.event("resize", window),
-      () => new zui.ResizeEvent(window.innerWidth, window.innerHeight)
+      () => new zui.ZuiResizeEvent(window.innerWidth, window.innerHeight)
     )
   ),
   canvas

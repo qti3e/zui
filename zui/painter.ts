@@ -12,23 +12,6 @@ export class Painter {
     private readonly defaultTextStyle: Required<ZuiTextStyle>
   ) {}
 
-  getImageData(sx: Pixel, sy: Pixel, width: Pixel, height: Pixel): ImageData {
-    return this.backend.getImageData(
-      sx.valueOf() + this.translateX,
-      sy.valueOf() + this.translateY,
-      width.valueOf(),
-      height.valueOf()
-    );
-  }
-
-  putImageData(img: ImageData, x: Pixel, y: Pixel): void {
-    return this.backend.putImageData(
-      img,
-      x.valueOf() + this.translateX,
-      y.valueOf() + this.translateY
-    );
-  }
-
   drawZuiPath(
     x: number,
     y: number,
@@ -42,7 +25,7 @@ export class Painter {
     ctx.lineWidth = lineWidth;
     ctx.beginPath();
 
-    loop: for (let i = 0; ;) {
+    loop: for (let i = 0; ; ) {
       const m = path[i++];
       switch (m) {
         // moveTo followed by a bezierCurveTo

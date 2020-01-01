@@ -7,7 +7,7 @@ import {
   Reactive,
   Painter
 } from "../../zui";
-import grin from "../../icons/grin-hearts.svg";
+import grin from "../../icons/edit.svg";
 
 class SidebarButton extends Widget {
   private readonly updater = new Reactive(0, this);
@@ -45,7 +45,7 @@ class SidebarButton extends Widget {
 export class Sidebar extends Widget {
   style: ZuiStyle = {
     background: Color.RGB(0x22, 0x28, 0x31),
-    shadow: new Shadow(3, 0, Color.RGBA(0x22, 0x28, 0x31, 0.5), 5)
+    shadow: new Shadow(3, 0, Color.HEX(0, 0.8), 5)
   };
 
   width = 48;

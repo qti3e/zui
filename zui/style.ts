@@ -47,7 +47,7 @@ export class Color {
    */
   static HEX(hex: number, opacity = 1) {
     const r = hex >> 16;
-    const g = hex >> 8 & 0xff;
+    const g = (hex >> 8) & 0xff;
     const b = hex & 0xff;
     return new Color(r, g, b, opacity);
   }
