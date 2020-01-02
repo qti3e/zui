@@ -41,19 +41,19 @@ class MiniMap extends Widget {
     readonly scale: Reactive<number>
   ) {
     super();
-    const con = (e: number | Reactive<number>) =>
-      e instanceof Reactive ? connect(e, this) : null;
-    con(viewWidth);
-    con(viewHeight);
-    con(containedWidth);
-    con(containedHeight);
-    connect(offsetX, this);
-    connect(offsetY, this);
-    connect(scale, this);
 
     const ratio = div(containedWidth, MiniMapWidth);
     this.height = div(containedHeight, ratio);
 
+    // Currently this computation adds 21 edges to the DFG, maybe we need to
+    // optimize this, by having 4 private reactive variable (width, height,
+    // x, y) and update the values on every draw.
+    // Another proposal is grouped computations like:
+    // const {x, y, width, height} = grouped([...vars we depend on],
+    // ([...vars in the same order]) => {
+    //     x: ..., (produce a js number)
+    //     y: ...,
+    // })
     const sr = mul(scale, ratio);
     const width = div(viewWidth, sr);
     const height = div(viewHeight, sr);
@@ -64,9 +64,18 @@ class MiniMap extends Widget {
   }
 
   draw() {}
+
+  handleClick(x: number, y: number) {
+    // TODO(qti3e) Do the bound checking stuff (clicking on the right side of
+    // the map will move the offsetX out of the allowed view).
+    const nsr =
+      (-this.scale.valueOf() * this.containedWidth.valueOf()) / MiniMapWidth;
+    this.offsetX.set(nsr * x);
+    this.offsetY.set(nsr * y);
+  }
 }
 
-class Scaled extends Widget {
+export class Scaled extends Widget {
   readonly width: number | Reactive<number>;
   readonly height: number | Reactive<number>;
 
@@ -83,10 +92,7 @@ class Scaled extends Widget {
     this.addChild(x, y, child);
   }
 
-  draw(painter: Painter) {
-    const scale = this.scale.valueOf();
-    (painter as any).backend.scale(scale, scale);
-  }
+  draw(painter: Painter) {}
 }
 
 export class Controller extends Widget {
@@ -142,5 +148,7 @@ export class Controller extends Widget {
 
     this.x.set(Math.max(minX, Math.min(0, this.x.get() - deltaX * scale)));
     this.y.set(Math.max(minY, Math.min(0, this.y.get() - deltaY * scale)));
+    // const newS = Math.max(0.1, Math.min(2, scale + deltaY * 0.01));
+    // this.scale.set(newS);
   }
 }

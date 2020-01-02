@@ -11,6 +11,7 @@ import {
   CanvasEvent,
   ZuiMouseDownEvent
 } from "./events";
+import { Scaled } from "./controller";
 
 export type CanvasOptions = {
   alpha?: boolean;
@@ -19,7 +20,7 @@ export type CanvasOptions = {
 };
 
 type RenderedWidgetData = {
-  clip: Path2D;
+  clip?: Path2D;
   boundingBox: BoundingBox;
 };
 
@@ -81,6 +82,11 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
    * Current translate y.
    */
   private translateY = 0;
+
+  /**
+   * Current scale.
+   */
+  private scale = 1;
 
   /**
    * Previous intersecting widgets that had either handleMouseIn or
@@ -246,10 +252,17 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     this.context.fillStyle = this.style.background.toString();
     this.context.fillRect(0, 0, this.width, this.height);
 
+    const viewport: BoundingBox = {
+      left: 0,
+      right: this.width,
+      top: 0,
+      bottom: this.height
+    };
+
     for (const child of this.children) {
       const x = child.position.x.valueOf();
       const y = child.position.y.valueOf();
-      this.draw({ x, y }, child.widget);
+      this.draw({ x, y }, child.widget, viewport);
     }
   }
 
@@ -264,33 +277,60 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     return this.style[key]!;
   }
 
-  private draw(position: Point2D, widget: Widget) {
+  private draw(position: Point2D, widget: Widget, box: BoundingBox) {
+    const scale = this.scale;
+    const width = widget.width.valueOf(); // The actual width - not scaled.
+    const height = widget.height.valueOf(); // The actual height - not scaled.
+    const left = this.translateX + scale * position.x;
+    const top = this.translateY + scale * position.y;
+    const boundingBox = {
+      left: left,
+      right: left + scale * width,
+      top: top,
+      bottom: top + scale * height
+    };
+
+    // Store this.
+    Canvas.widgetsToCanvasMap.set(widget, this);
+
+    // Check if bounding box is in the viewport.
+    const viewLeft = box.left;
+    const viewRight = box.right;
+    const viewTop = box.top;
+    const viewBottom = box.bottom;
+
+    if (
+      boundingBox.left > viewRight ||
+      boundingBox.right < viewLeft ||
+      boundingBox.top > viewBottom ||
+      boundingBox.bottom < viewTop
+    ) {
+      // Save the data of this widget.
+      this.widgetsData.set(widget, { boundingBox });
+      return;
+    }
+
+    // Start drawing.
     const { context } = this;
     context.save();
     context.translate(position.x, position.y);
-    this.translateX += position.x;
-    this.translateY += position.y;
 
-    const width = widget.width.valueOf();
-    const height = widget.height.valueOf();
+    this.translateX += scale * position.x;
+    this.translateY += scale * position.y;
+
+    // Get the styles.
     const shadow = this.getStyle(widget, "shadow");
     const radius = this.getStyle(widget, "borderRadius");
-    const boundingBox = {
-      left: this.translateX,
-      right: this.translateX + width,
-      top: this.translateY,
-      bottom: this.translateY + height
-    };
 
     // Construct the clip.
     const clip = new Path2D();
     rect(clip, width, height, radius);
 
     // Save the data of this widget.
-    this.widgetsData.set(widget, { boundingBox, clip });
-
-    // Store this.
-    Canvas.widgetsToCanvasMap.set(widget, this);
+    this.widgetsData.set(widget, {
+      boundingBox,
+      clip: radius.isZero ? undefined : clip
+    });
 
     // 0. Container & Background
     context.shadowColor = shadow.color.toString();
@@ -313,23 +353,37 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       )
     );
 
+    const currentElementScale =
+      widget instanceof Scaled ? widget.scale.valueOf() : 1;
+    this.scale *= currentElementScale;
+    context.scale(currentElementScale, currentElementScale);
+
     // 3. Draw children.
+    // Compute the viewport.
+    const childBox: BoundingBox = {
+      left: left > viewLeft ? left : viewLeft, // max
+      right: boundingBox.right < viewRight ? boundingBox.right : viewRight, // min
+      top: top > viewTop ? top : viewTop, // max
+      bottom: boundingBox.bottom < viewBottom ? boundingBox.bottom : viewBottom // min
+    };
+
     for (const child of widget.children) {
       const x = child.position.x.valueOf();
       const y = child.position.y.valueOf();
       if (
-        x > width ||
-        y > height ||
+        x > scale * width ||
+        y > scale * height ||
         x + child.widget.width.valueOf() < 0 ||
         y + child.widget.height.valueOf() < 0
       )
         continue;
-      this.draw({ x, y }, child.widget);
+      this.draw({ x, y }, child.widget, childBox);
     }
 
     context.restore();
-    this.translateX -= position.x;
-    this.translateY -= position.y;
+    this.scale /= currentElementScale;
+    this.translateX -= scale * position.x;
+    this.translateY -= scale * position.y;
 
     // Call afterDraw.
     if (widget.afterDraw) widget.afterDraw();

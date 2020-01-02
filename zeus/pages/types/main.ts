@@ -9,9 +9,15 @@ export class TypeNode extends Widget {
     shadow: new Shadow(2, 2, Color.HEX(0x000, 0.5), 5)
   }
 
-  draw() { }
+  constructor(readonly v: number = 0) { super() }
 
-  handleClick() {}
+  draw() {
+    console.log("D", this.v)
+  }
+
+  handleClick() {
+    console.log("P", this.v)
+  }
 }
 
 export class TypesEditorView extends Widget {
@@ -20,11 +26,11 @@ export class TypesEditorView extends Widget {
 
   constructor() {
     super();
-    this.addChild(0, 0, new TypeNode());
-    this.addChild(200, 100, new TypeNode());
-    this.addChild(2500, 100, new TypeNode());
-    this.addChild(4700, 100, new TypeNode());
-    this.addChild(4700, 2950, new TypeNode());
+    this.addChild(0, 0, new TypeNode(0));
+    this.addChild(200, 100, new TypeNode(1));
+    this.addChild(2500, 100, new TypeNode(2));
+    this.addChild(4700, 100, new TypeNode(3));
+    this.addChild(4700, 2950, new TypeNode(4));
   }
 
   draw() { }
