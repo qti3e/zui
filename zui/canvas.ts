@@ -1,4 +1,4 @@
-import { Widget, WidgetPosition } from "./widget";
+import { Widget } from "./widget";
 import { ZuiReceiver, Point2D, BoundingBox } from "./types";
 import { Color, ZuiStyle, Shadow, BorderRadius, ZuiTextStyle } from "./style";
 import { rect } from "./clip";
@@ -46,7 +46,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
   /**
    * The widgets in this element.
    */
-  private children: WidgetPosition[] = [];
+  private children: Widget[] = [];
 
   /**
    * The DOM Canvas element.
@@ -121,7 +121,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
    * @param widget The widget we want to add to that offset.
    */
   addWidget(x: number, y: number, widget: Widget) {
-    this.children.push({ widget, position: { x, y } });
+    this.children.push(widget);
     this.redraw();
   }
 
@@ -165,7 +165,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     const result: Widget[] = [];
 
     const toSee = this.children.slice();
-    for (const { widget } of toSee) {
+    for (const widget of toSee) {
       const data = this.widgetsData.get(widget);
       if (data && isInBoundingBox(data.boundingBox)) {
         toSee.push(...widget.children);
@@ -259,9 +259,9 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     };
 
     for (const child of this.children) {
-      const x = child.position.x.valueOf();
-      const y = child.position.y.valueOf();
-      this.draw({ x, y }, child.widget, viewport);
+      const x = child.x.valueOf();
+      const y = child.y.valueOf();
+      this.draw({ x, y }, child, viewport);
     }
   }
 
@@ -367,16 +367,9 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     };
 
     for (const child of widget.children) {
-      const x = child.position.x.valueOf();
-      const y = child.position.y.valueOf();
-      if (
-        x > scale * width ||
-        y > scale * height ||
-        x + child.widget.width.valueOf() < 0 ||
-        y + child.widget.height.valueOf() < 0
-      )
-        continue;
-      this.draw({ x, y }, child.widget, childBox);
+      const x = child.x.valueOf();
+      const y = child.y.valueOf();
+      this.draw({ x, y }, child, childBox);
     }
 
     context.restore();

@@ -7,7 +7,7 @@ import {
   connect
 } from "../../zui";
 import { Sidebar } from "./sidebar";
-import { TypesEditor } from "../pages/types/main";
+import { TypesEditor, TypesEditorView } from "../pages/types/main";
 
 export class App extends Widget {
   width = pageWidth;
@@ -24,8 +24,12 @@ export class App extends Widget {
     connect(this.height, this);
 
     // Add children.
-    this.addChild(48, 0, new TypesEditor());
-    this.addChild(0, 0, new Sidebar());
+
+    const typesEditor = new TypesEditor();
+    typesEditor.x.set(48);
+    this.addChild(typesEditor);
+
+    this.addChild(new Sidebar());
   }
 
   draw() {}

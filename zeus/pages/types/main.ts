@@ -26,11 +26,18 @@ export class TypesEditorView extends Widget {
 
   constructor() {
     super();
-    this.addChild(0, 0, new TypeNode(0));
-    this.addChild(200, 100, new TypeNode(1));
-    this.addChild(2500, 100, new TypeNode(2));
-    this.addChild(4700, 100, new TypeNode(3));
-    this.addChild(4700, 2950, new TypeNode(4));
+    const addChild = (x: number, y: number, v: number) => {
+      const w = new TypeNode(v);
+      w.x.set(x);
+      w.y.set(y);
+
+      this.addChild(w);
+    }
+    addChild(0, 0, 0);
+    addChild(200, 100, 1);
+    addChild(2500, 100, 2);
+    addChild(4700, 100, 3);
+    addChild(4700, 2950, 4);
   }
 
   draw() { }
@@ -43,7 +50,7 @@ export class TypesEditor extends Widget{
 
   constructor() {
     super();
-    this.addChild(0, 0, new Controller(this.width, this.height, new TypesEditorView()));
+    this.addChild(new Controller(this.width, this.height, new TypesEditorView()));
   }
 
   draw() {}

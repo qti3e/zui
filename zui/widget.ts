@@ -1,17 +1,8 @@
-import { ReactivePoint2D } from "./types";
 import { Canvas } from "./canvas";
 import { ZuiStyle } from "./style";
 import { Reactive } from "./reactive";
 import { Painter } from "./painter";
 import { connect } from "./DFG";
-
-/**
- * A widget instance with a position.
- */
-export type WidgetPosition = {
-  position: ReactivePoint2D;
-  widget: Widget;
-};
 
 export abstract class Widget {
   /**
@@ -25,32 +16,33 @@ export abstract class Widget {
   parent?: Widget | Canvas;
 
   /**
+   * The x offset of the current widget within its parent.
+   */
+  readonly x = new Reactive<number>(0, this);
+
+  /**
+   * The y offset of the current widget within its parent.
+   */
+  readonly y = new Reactive<number>(0, this);
+
+  /**
    * List of children for this widget so that we render them on the top
    * of this widget.
    */
-  readonly children: ReadonlySet<WidgetPosition> = new Set();
+  readonly children: ReadonlySet<Widget> = new Set();
 
   /**
    * Add another widget as child of this widget.
    *
-   * @param x The x offset of the widget.
-   * @param y The y offset of the widget.
    * @param widget Widget which we want to add to the current widget as a child.
    */
-  protected addChild(
-    x: number | Reactive<number>,
-    y: number | Reactive<number>,
-    widget: Widget
-  ) {
+  protected addChild(widget: Widget) {
     const currentParent = widget.parent;
     if (currentParent !== this && currentParent !== undefined)
       throw new Error("Widget is already in use.");
 
     widget.parent = this;
-    Set.prototype.add.call(this.children, { widget, position: { x, y } });
-
-    if (x instanceof Reactive) connect(x, this);
-    if (y instanceof Reactive) connect(y, this);
+    Set.prototype.add.call(this.children, widget);
   }
 
   /**

@@ -60,7 +60,11 @@ class MiniMap extends Widget {
     const x = neg(div(offsetX, sr));
     const y = neg(div(offsetY, sr));
 
-    this.addChild(x, y, new MiniMapArea(width, height));
+    const area = new MiniMapArea(width, height);
+    connect(x, area.x);
+    connect(y, area.y);
+
+    this.addChild(area);
   }
 
   draw() {}
@@ -80,24 +84,26 @@ export class Scaled extends Widget {
   readonly height: number | Reactive<number>;
 
   constructor(
-    readonly x: Reactive<number>,
-    readonly y: Reactive<number>,
+    x: Reactive<number>,
+    y: Reactive<number>,
     readonly child: Widget,
-    readonly scale: number | Reactive<number>
+    readonly scale: Reactive<number>
   ) {
     super();
     this.width = child.width;
     this.height = child.height;
-    if (scale instanceof Reactive) connect(scale, this);
-    this.addChild(x, y, child);
+    connect(scale, this);
+    connect(x, child.x);
+    connect(y, child.y);
+    this.addChild(child);
   }
 
-  draw(painter: Painter) {}
+  draw() {}
 }
 
 export class Controller extends Widget {
-  private x = new Reactive(0, this);
-  private y = new Reactive(0, this);
+  private xOffset = new Reactive(0, this);
+  private yOffset = new Reactive(0, this);
   private scale = new Reactive(1.5, this);
 
   constructor(
@@ -108,11 +114,9 @@ export class Controller extends Widget {
     super();
 
     this.addChild(
-      0,
-      0,
       new Scaled(
-        div(this.x, this.scale),
-        div(this.y, this.scale),
+        div(this.xOffset, this.scale),
+        div(this.yOffset, this.scale),
         widget,
         this.scale
       )
@@ -123,16 +127,15 @@ export class Controller extends Widget {
       height,
       widget.width,
       widget.height,
-      this.x,
-      this.y,
+      this.xOffset,
+      this.yOffset,
       this.scale
     );
 
-    this.addChild(
-      sub(this.width, miniMap.width + 20),
-      sub(this.height, add(miniMap.height, 20)),
-      miniMap
-    );
+    connect(sub(this.width, miniMap.width + 20), miniMap.x);
+    connect(sub(this.height, add(miniMap.height, 20)), miniMap.y);
+
+    this.addChild(miniMap);
   }
 
   draw() {}
@@ -146,8 +149,12 @@ export class Controller extends Widget {
     const minX = wWidth > cWidth ? cWidth - wWidth : 0;
     const minY = wHeight > cHeight ? cHeight - wHeight : 0;
 
-    this.x.set(Math.max(minX, Math.min(0, this.x.get() - deltaX * scale)));
-    this.y.set(Math.max(minY, Math.min(0, this.y.get() - deltaY * scale)));
+    this.xOffset.set(
+      Math.max(minX, Math.min(0, this.xOffset.get() - deltaX * scale))
+    );
+    this.yOffset.set(
+      Math.max(minY, Math.min(0, this.yOffset.get() - deltaY * scale))
+    );
     // const newS = Math.max(0.1, Math.min(2, scale + deltaY * 0.01));
     // this.scale.set(newS);
   }

@@ -1,6 +1,7 @@
 import { ZuiEmitter, ZuiReceiver } from "./types";
 import { Widget } from "./widget";
 import { Canvas } from "./canvas";
+import { Reactive } from "./reactive";
 
 type DFGEdge<T = unknown> = {
   emitter: ZuiEmitter<T>;
@@ -37,6 +38,9 @@ export function connect(emitter: ZuiEmitter, receiver: ZuiReceiver | Widget) {
     if (e === emitter && r === receiver) return;
 
   DFG.push({ emitter, receiver });
+
+  if (emitter instanceof Reactive && receiver instanceof Reactive)
+    receiver.set(emitter.get());
 }
 
 /**

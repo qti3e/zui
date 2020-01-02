@@ -54,8 +54,8 @@ export class Sidebar extends Widget {
 
   constructor() {
     super();
-    this.addChild(0, 0, new SidebarButton());
-    this.addChild(0, 48, new SidebarButton());
+    // this.addChild(0, 0, new SidebarButton());
+    // this.addChild(0, 48, new SidebarButton());
   }
 
   draw(painter: Painter) {}
