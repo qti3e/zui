@@ -20,18 +20,9 @@ export abstract class Widget {
   style: ZuiStyle | undefined;
 
   /**
-   * Maps every widget to its parent.
+   * Widget`s parent.
    */
-  private static readonly parents = new WeakMap<Widget, Widget | Canvas>();
-
-  /**
-   * Return parent of a widget.
-   *
-   * @param widget The widget which we want to find its parent.
-   */
-  static parentOf(widget: Widget): Widget | Canvas | undefined {
-    return this.parents.get(widget);
-  }
+  parent?: Widget | Canvas;
 
   /**
    * List of children for this widget so that we render them on the top
@@ -51,11 +42,11 @@ export abstract class Widget {
     y: number | Reactive<number>,
     widget: Widget
   ) {
-    const currentParent = Widget.parentOf(widget);
+    const currentParent = widget.parent;
     if (currentParent !== this && currentParent !== undefined)
       throw new Error("Widget is already in use.");
 
-    Widget.parents.set(widget, this);
+    widget.parent = this;
     Set.prototype.add.call(this.children, { widget, position: { x, y } });
 
     if (x instanceof Reactive) connect(x, this);

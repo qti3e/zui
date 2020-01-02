@@ -108,8 +108,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     const parentCache = Canvas.widgetsToCanvasMap.get(widget);
     if (parentCache) return parentCache;
     let current: Widget | Canvas | undefined = widget;
-    while (current && !(current instanceof Canvas))
-      current = Widget.parentOf(current);
+    while (current && !(current instanceof Canvas)) current = current.parent;
     if (!current) return;
     Canvas.widgetsToCanvasMap.set(widget, current);
     return current;
