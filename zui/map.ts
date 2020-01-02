@@ -14,7 +14,7 @@ export function map<T, U>(
   emitter: ZuiEmitter<T>,
   callback: MapCallback<T, U>
 ): ZuiEmitter<U> {
-  const mapHandler = new Map(callback);
+  const mapHandler = new MapHandler(callback);
   connect(emitter, mapHandler);
   return mapHandler;
 }
@@ -22,7 +22,7 @@ export function map<T, U>(
 /**
  * @internal
  */
-class Map<T, U> extends Queued<T, U> {
+class MapHandler<T, U> extends Queued<T, U> {
   constructor(readonly callback: MapCallback<T, U>) {
     super();
   }

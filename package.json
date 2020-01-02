@@ -7,6 +7,15 @@
   "license": "MIT",
   "typings": "dist/index.d.ts",
   "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-better-rollup": "^4.0.1",
+    "gulp-closure-compiler": "^0.4.0",
+    "gulp-rename": "^2.0.0",
+    "parcel-bundler": "^1.12.4",
+    "rollup": "^1.27.14",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-typescript": "^1.0.1",
+    "tslib": "^1.10.0",
     "typescript": "^3.7.4"
   }
 }
