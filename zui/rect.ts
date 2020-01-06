@@ -15,9 +15,9 @@ export function rect(
     return;
   }
 
-  const PI2 = Math.PI / 2;
   const PI = Math.PI;
-  const PI32 = (3 * Math.PI) / 2;
+  const PI2 = PI / 2;
+  const PI32 = (3 * PI) / 2;
   const { tlw, tlh, trh, trw, blw, blh, brh, brw } = radius;
 
   // Top Left

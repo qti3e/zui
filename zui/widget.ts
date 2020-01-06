@@ -2,7 +2,6 @@ import { Canvas } from "./canvas";
 import { ZuiStyle } from "./style";
 import { Reactive } from "./reactive";
 import { Painter } from "./painter";
-import { connect } from "./DFG";
 
 export abstract class Widget {
   /**

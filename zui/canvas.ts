@@ -1,7 +1,7 @@
 import { Widget } from "./widget";
 import { ZuiReceiver, Point2D, BoundingBox } from "./types";
 import { Color, ZuiStyle, Shadow, BorderRadius, ZuiTextStyle } from "./style";
-import { rect } from "./clip";
+import { rect } from "./rect";
 import { Painter } from "./painter";
 import {
   ZuiResizeEvent,
@@ -9,7 +9,8 @@ import {
   ZuiClickEvent,
   ZuiWheelEvent,
   CanvasEvent,
-  ZuiMouseDownEvent
+  ZuiMouseDownEvent,
+  ZuiMouseUpEvent
 } from "./events";
 import { Scaled } from "./controller";
 
@@ -22,6 +23,7 @@ export type CanvasOptions = {
 type RenderedWidgetData = {
   clip?: Path2D;
   boundingBox: BoundingBox;
+  scale: number;
 };
 
 // The default style.
@@ -151,6 +153,9 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       | "handleMouseOut"
       | "handleClick"
       | "handleWheel"
+      | "handleMouseDown"
+      | "handleMouseUp"
+      | "handleMouseMove"
     )[]
   ): Widget[] {
     if (event.length < 1 || event.length > 4)
@@ -182,6 +187,14 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     return result;
   }
 
+  private getCordsWithInWidget(cord: Point2D, widget: Widget): Point2D {
+    const data = this.widgetsData.get(widget)!;
+    const box = data.boundingBox;
+    const x = (cord.x - box.left) / data.scale;
+    const y = (cord.y - box.top) / data.scale;
+    return { x, y };
+  }
+
   receive(event: CanvasEvent) {
     if (event instanceof ZuiResizeEvent) {
       this.width = event.width;
@@ -190,29 +203,38 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     }
 
     if (event instanceof ZuiMouseMoveEvent) {
-      const mouseInOut = this.findIntersectingWidgetsWithEvent(event, [
+      const widgets = this.findIntersectingWidgetsWithEvent(event, [
         "handleMouseIn",
         "handleMouseOut",
-        "handleClick"
+        "handleClick",
+        "handleMouseMove"
       ]);
 
-      // Fire mouse out event.
+      // Fire mouse out event. (this.mouseInOut is the previous result of
+      // widgets.)
       for (const x of this.mouseInOut)
-        if (x.handleMouseOut && mouseInOut.indexOf(x) < 0) x.handleMouseOut();
+        if (x.handleMouseOut && widgets.indexOf(x) < 0) x.handleMouseOut();
 
-      // Fire mouse in event.
+      // Fire mouseIn & mouseMove event.
       let clickable = false;
-      for (const x of mouseInOut) {
-        if (x.handleMouseIn && this.mouseInOut.indexOf(x) < 0)
-          x.handleMouseIn();
-        if (x.handleClick) clickable = true;
+      for (const widget of widgets) {
+        if (widget.handleMouseIn && this.mouseInOut.indexOf(widget) < 0) {
+          widget.handleMouseIn();
+        }
+
+        if (widget.handleMouseMove) {
+          const { x, y } = this.getCordsWithInWidget(event, widget);
+          widget.handleMouseMove!(x, y);
+        }
+
+        if (!clickable && widget.handleClick) clickable = true;
       }
 
       const style = this.domElement.style;
       const cursor = clickable ? "pointer" : "default";
       if (style.cursor !== cursor) style.cursor = cursor;
-
-      this.mouseInOut = mouseInOut;
+      // Store the current result as previous.
+      this.mouseInOut = widgets;
     }
 
     if (event instanceof ZuiClickEvent) {
@@ -222,9 +244,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
 
       if (widgets.length) {
         const widget = widgets[widgets.length - 1];
-        const box = this.widgetsData.get(widget)!.boundingBox;
-        const x = event.x - box.left;
-        const y = event.y - box.top;
+        const { x, y } = this.getCordsWithInWidget(event, widget);
         widget.handleClick!(x, y);
       }
     }
@@ -236,11 +256,35 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
 
       if (widgets.length) {
         const widget = widgets[widgets.length - 1];
-        widget.handleWheel!(event.deltaX, event.deltaY);
+        const scale = this.widgetsData.get(widget)!.scale;
+        const deltaX = event.deltaX * scale;
+        const deltaY = event.deltaY * scale;
+        widget.handleWheel!(deltaX, deltaY);
       }
     }
 
     if (event instanceof ZuiMouseDownEvent) {
+      const widgets = this.findIntersectingWidgetsWithEvent(event, [
+        "handleMouseDown"
+      ]);
+
+      if (widgets.length) {
+        const widget = widgets[widgets.length - 1];
+        const { x, y } = this.getCordsWithInWidget(event, widget);
+        widget.handleMouseDown!(x, y);
+      }
+    }
+
+    if (event instanceof ZuiMouseUpEvent) {
+      const widgets = this.findIntersectingWidgetsWithEvent(event, [
+        "handleMouseUp"
+      ]);
+
+      if (widgets.length) {
+        const widget = widgets[widgets.length - 1];
+        const { x, y } = this.getCordsWithInWidget(event, widget);
+        widget.handleMouseUp!(x, y);
+      }
     }
   }
 
@@ -305,7 +349,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       boundingBox.bottom < viewTop
     ) {
       // Save the data of this widget.
-      this.widgetsData.set(widget, { boundingBox });
+      this.widgetsData.set(widget, { boundingBox, scale });
       return;
     }
 
@@ -328,7 +372,8 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     // Save the data of this widget.
     this.widgetsData.set(widget, {
       boundingBox,
-      clip: radius.isZero ? undefined : clip
+      clip: radius.isZero ? undefined : clip,
+      scale
     });
 
     // 0. Container & Background
@@ -342,7 +387,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     // 1. Clip
     context.clip(clip);
 
-    // 1. Draw element.
+    // 2. Draw element.
     widget.draw(
       new Painter(
         context,
@@ -372,6 +417,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       this.draw({ x, y }, child, childBox);
     }
 
+    // 4. Restore the previous context.
     context.restore();
     this.scale /= currentElementScale;
     this.translateX -= scale * position.x;

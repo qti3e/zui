@@ -1,6 +1,5 @@
 import { Widget } from "./widget";
 import { Reactive } from "./reactive";
-import { Painter } from "./painter";
 import { div, sub, add, neg, mul } from "./math";
 import { ZuiStyle, Shadow, Color } from "./style";
 import { connect } from "./DFG";
@@ -104,7 +103,7 @@ export class Scaled extends Widget {
 export class Controller extends Widget {
   private xOffset = new Reactive(0, this);
   private yOffset = new Reactive(0, this);
-  private scale = new Reactive(1.5, this);
+  private scale = new Reactive(1, this);
 
   constructor(
     readonly width: number | Reactive<number>,

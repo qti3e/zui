@@ -8,6 +8,7 @@ type DFGEdge<T = unknown> = {
   receiver: ZuiReceiver<T> | Widget;
 };
 
+const updatedCanvases: Set<Canvas> = new Set();
 let DFG: DFGEdge[] = [];
 
 (window as any)["zuiDFG"] = DFG;
@@ -64,9 +65,7 @@ export function detach(node: ZuiReceiver | ZuiEmitter | Widget) {
  * Handle the next tick, emits new data to the receivers.
  */
 export function handleNextTick() {
-  const changedWidgets = new Set<Widget>();
-  const changedCanvases = new Set<Canvas>();
-  let seen = new Set<ZuiEmitter>();
+  const seen = new Set<ZuiEmitter>();
 
   for (let i = 0; i < DFG.length; ++i) {
     const emitter = DFG[i].emitter;
@@ -88,17 +87,35 @@ export function handleNextTick() {
       if (DFG[j].emitter !== emitter) continue;
       const receiver = DFG[j].receiver;
       if (receiver instanceof Widget) {
-        changedWidgets.add(receiver);
+        notify(receiver);
       } else {
         for (const d of data) receiver.receive(d);
       }
     }
   }
 
-  for (const widget of changedWidgets) {
-    const canvas = Canvas.canvasOf(widget);
-    if (canvas) changedCanvases.add(canvas);
-  }
+  render();
+}
 
-  for (const canvas of changedCanvases) canvas.redraw();
+/**
+ * Notify that a widget has been changed.
+ *
+ * @param widget The widget that has been changed.
+ * @internal
+ */
+function notify(widget: Widget) {
+  const canvas = Canvas.canvasOf(widget);
+
+  // Offscreen widget.
+  if (!canvas) return;
+
+  updatedCanvases.add(canvas);
+}
+
+/**
+ * To render the data into the canvases.
+ */
+function render() {
+  for (const canvas of updatedCanvases) canvas.redraw();
+  updatedCanvases.clear();
 }
