@@ -1,0 +1,5 @@
+{
+  "modules": {
+    "out": "zeus/main.ts"
+  }
+}

@@ -368,3 +368,23 @@ export type ZuiTextStyle = {
    */
   fontSize?: number;
 };
+
+/**
+ * Style which can be applied to a line element.
+ */
+export type ZuiLineStyle = {
+  /**
+   * Stroke color of the line.
+   */
+  color?: Color;
+
+  /**
+   * Thickness of the line.
+   */
+  width?: number;
+
+  /**
+   * Line's drop shadow.
+   */
+  shadow?: Shadow;
+};

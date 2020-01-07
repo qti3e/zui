@@ -12,7 +12,7 @@ export class Draggable {
   }
 
   stop(widget: Widget) {
-    this.moving = undefined;
+    if (this.moving === widget) this.moving = undefined;
   }
 
   handleMouseMove(x: number, y: number) {

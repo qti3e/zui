@@ -3,6 +3,7 @@ const rollup = require("gulp-better-rollup");
 const rename = require("gulp-rename");
 const typescript = require("rollup-plugin-typescript");
 const resolve = require("rollup-plugin-node-resolve");
+const tscc = require("@tscc/rollup-plugin-tscc").default;
 
 gulp.task("build:js", function() {
   const rollupOptions = {

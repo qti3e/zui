@@ -17,3 +17,4 @@ export * from "./math";
 export * from "./events";
 export * from "./controller";
 export * from "./draggable";
+export * from "./node";

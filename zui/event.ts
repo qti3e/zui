@@ -1,6 +1,5 @@
 import { ZuiEmitter } from "./types";
 import { Queued } from "./queued";
-import { handleNextTick } from "./DFG";
 
 type EventEmitter = {
   addEventListener: (name: string, cb: (e: any) => void) => void;

@@ -11,8 +11,6 @@ type DFGEdge<T = unknown> = {
 const updatedCanvases: Set<Canvas> = new Set();
 let DFG: DFGEdge[] = [];
 
-(window as any)["zuiDFG"] = DFG;
-
 /**
  * Connect an emitter to a widget, it will make the widget be redrawn every time
  * emitter emits a new data.
@@ -118,4 +116,78 @@ function notify(widget: Widget) {
 function render() {
   for (const canvas of updatedCanvases) canvas.redraw();
   updatedCanvases.clear();
+}
+
+export function toViz(): string {
+  let lines: string[] = [
+    "digraph zui {",
+    "  ratio = fill;",
+    "  node [style=filled];"
+  ];
+
+  const nodes = new Map<ZuiEmitter | ZuiReceiver | Widget, string>();
+  const counter = new Counter<string>();
+  const canvases = new Set<Canvas>();
+  const getNode = (node: ZuiEmitter | ZuiReceiver | Widget | Canvas) => {
+    if (nodes.has(node)) return nodes.get(node)!;
+
+    const constructorName = node.constructor.name;
+    const n = counter.get(constructorName);
+    const name = `"${constructorName} #${n}"`;
+    counter.incr(constructorName);
+    nodes.set(node, name);
+    return name;
+  };
+
+  // Create the widget tree graph.
+  lines.push(`  subgraph WidgetTree {`);
+  lines.push(`    label = "Widget Tree";`);
+  lines.push(`    color = "blue;"`);
+
+  const seenWidgets = new Set<Widget>();
+  for (const { receiver: widget } of DFG) {
+    if (!(widget instanceof Widget)) continue;
+    if (seenWidgets.has(widget)) continue;
+    const parent = widget.parent;
+    if (!parent) continue;
+
+    const node = getNode(widget);
+    const pNode = getNode(parent);
+    lines.push(`    ${pNode} -> ${node} [color="pink"];`);
+    seenWidgets.add(widget);
+  }
+
+  lines.push(`  }`);
+
+  for (const { emitter, receiver } of DFG) {
+    const from = getNode(emitter);
+    const to = getNode(receiver);
+    lines.push("  " + from + " -> " + to + ";");
+  }
+
+  for (const { receiver } of DFG) {
+    if (receiver instanceof Widget) {
+      const node = getNode(receiver);
+      lines.push(`  ${node} [color="0.650 0.200 1.000"];`);
+    }
+  }
+
+  lines.push("}");
+  return lines.join("\n");
+}
+
+export class Counter<K> {
+  private map = new Map<K, number>();
+
+  incr(key: K, n = 1) {
+    this.map.set(key, (this.map.get(key) || 0) + n);
+  }
+
+  get(key: K): number {
+    return this.map.get(key) || 0;
+  }
+
+  keys(): IterableIterator<K> {
+    return this.map.keys();
+  }
 }

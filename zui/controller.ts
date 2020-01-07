@@ -103,7 +103,7 @@ export class Scaled extends Widget {
 export class Controller extends Widget {
   private xOffset = new Reactive(0, this);
   private yOffset = new Reactive(0, this);
-  private scale = new Reactive(1, this);
+  private currentScale = new Reactive(1, this);
 
   constructor(
     readonly width: number | Reactive<number>,
@@ -114,10 +114,10 @@ export class Controller extends Widget {
 
     this.addChild(
       new Scaled(
-        div(this.xOffset, this.scale),
-        div(this.yOffset, this.scale),
+        div(this.xOffset, this.currentScale),
+        div(this.yOffset, this.currentScale),
         widget,
-        this.scale
+        this.currentScale
       )
     );
 
@@ -128,7 +128,7 @@ export class Controller extends Widget {
       widget.height,
       this.xOffset,
       this.yOffset,
-      this.scale
+      this.currentScale
     );
 
     connect(sub(this.width, miniMap.width + 20), miniMap.x);
@@ -140,7 +140,7 @@ export class Controller extends Widget {
   draw() {}
 
   handleWheel(deltaX: number, deltaY: number) {
-    const scale = this.scale.valueOf();
+    const scale = this.currentScale.valueOf();
     const wWidth = scale * this.widget.width.valueOf();
     const cWidth = this.width.valueOf();
     const wHeight = scale * this.widget.height.valueOf();

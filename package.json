@@ -7,6 +7,8 @@
   "license": "MIT",
   "typings": "dist/index.d.ts",
   "devDependencies": {
+    "@tscc/rollup-plugin-tscc": "^0.4.7",
+    "@tscc/tscc": "^0.4.8",
     "gulp": "^4.0.2",
     "gulp-better-rollup": "^4.0.1",
     "gulp-closure-compiler": "^0.4.0",

@@ -53,3 +53,5 @@ function render() {
 }
 
 render();
+
+(window as any)["zui"] = zui;

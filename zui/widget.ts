@@ -14,6 +14,8 @@ export abstract class Widget {
    */
   parent?: Widget | Canvas;
 
+  scale: number | Reactive<number> = 1;
+
   /**
    * The x offset of the current widget within its parent.
    */

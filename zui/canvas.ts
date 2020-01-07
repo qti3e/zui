@@ -397,8 +397,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       )
     );
 
-    const currentElementScale =
-      widget instanceof Scaled ? widget.scale.valueOf() : 1;
+    const currentElementScale = widget.scale.valueOf();
     this.scale *= currentElementScale;
     context.scale(currentElementScale, currentElementScale);
 

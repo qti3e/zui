@@ -63,11 +63,25 @@ export class Painter {
     text.render(this.backend, this.defaultTextStyle, x, y);
   }
 
-  moveTo(x: Pixel, y: Pixel) {
-    this.backend.moveTo(x.valueOf(), y.valueOf());
+  line(x1: number, y1: number, x2: number, y2: number) {
+    const ctx = this.backend;
+    ctx.strokeStyle = "#ff0000";
+    ctx.lineWidth = 5;
+
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+
+    ctx.stroke();
   }
 
-  lineTo(x: Pixel, y: Pixel) {
-    this.backend.lineTo(x.valueOf(), y.valueOf());
+  bezierAB(x1: number, y1: number, x2: number, y2: number) {
+    const ctx = this.backend;
+    ctx.strokeStyle = "#00ff00";
+    ctx.lineWidth = 5;
+
+    ctx.moveTo(x1, y1);
+    ctx.bezierCurveTo(x2, y1, x1, y2, x2, y2);
+
+    ctx.stroke();
   }
 }
