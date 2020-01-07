@@ -1,8 +1,10 @@
 import { Widget } from "./widget";
 import { Reactive } from "./reactive";
 import { div, sub, add, neg, mul } from "./math";
-import { ZuiStyle, Shadow, Color } from "./style";
+import { ZuiStyle } from "./style";
 import { connect } from "./DFG";
+import { Color } from "./color";
+import { Shadow } from "./shadow";
 
 const MiniMapWidth = 180;
 

@@ -18,3 +18,8 @@ export * from "./events";
 export * from "./controller";
 export * from "./draggable";
 export * from "./node";
+export * from "./color";
+export * from "./colors";
+export * from "./border";
+export * from "./gradient";
+export * from "./shadow";

@@ -1,6 +1,8 @@
 import { Reactive } from "./reactive";
-import { ZuiTextStyle, Color } from "./style";
+import { ZuiTextStyle } from "./style";
 import { Text } from "./text";
+import { Color } from "./color";
+import { Colors } from "./colors";
 
 type Pixel = number | Reactive<number>;
 
@@ -18,7 +20,7 @@ export class Painter {
     path: Readonly<Int16Array | Int8Array | Int32Array>,
     scale = 1,
     lineWidth = 3,
-    color: Color = Color.White
+    color: Color = Colors.white
   ) {
     const ctx = this.backend;
     ctx.strokeStyle = color.toString();

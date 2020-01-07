@@ -1,6 +1,6 @@
 import { Widget } from "./widget";
 import { ZuiReceiver, Point2D, BoundingBox } from "./types";
-import { Color, ZuiStyle, Shadow, BorderRadius, ZuiTextStyle } from "./style";
+import { ZuiStyle, ZuiTextStyle, ZuiLineStyle } from "./style";
 import { rect } from "./rect";
 import { Painter } from "./painter";
 import {
@@ -12,13 +12,9 @@ import {
   ZuiMouseDownEvent,
   ZuiMouseUpEvent
 } from "./events";
-import { Scaled } from "./controller";
-
-export type CanvasOptions = {
-  alpha?: boolean;
-  style?: ZuiStyle;
-  textStyle?: ZuiTextStyle;
-};
+import { Colors } from "./colors";
+import { Shadow } from "./shadow";
+import { BorderRadius } from "./border";
 
 type RenderedWidgetData = {
   clip?: Path2D;
@@ -28,18 +24,31 @@ type RenderedWidgetData = {
 
 // The default style.
 const defaultStyle: Required<ZuiStyle> = Object.freeze({
-  background: Color.Transparent,
+  background: Colors.transparent,
   shadow: Shadow.NoShadow,
   borderRadius: BorderRadius.NoRadius
 });
 
 // The default text style.
 const defaultTextStyle: Required<ZuiTextStyle> = Object.freeze({
-  color: Color.Black,
+  color: Colors.black,
   shadow: Shadow.NoShadow,
   font: "Arial",
   fontSize: 12
 });
+
+const defaultLineStyle: Required<ZuiLineStyle> = Object.freeze({
+  color: Colors.red,
+  width: 3,
+  shadow: Shadow.NoShadow
+});
+
+export type CanvasOptions = {
+  alpha?: boolean;
+  style?: ZuiStyle;
+  textStyle?: ZuiTextStyle;
+  lineStyle?: ZuiLineStyle;
+};
 
 /**
  * The canvas.
@@ -69,6 +78,11 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
    * The default text style.
    */
   readonly defaultTextStyle: Readonly<Required<ZuiTextStyle>>;
+
+  /**
+   * The default line style.
+   */
+  readonly defaultLineStyle: Readonly<Required<ZuiLineStyle>>;
 
   /**
    * Last absolute position and size of every child in the current canvas.
@@ -143,6 +157,10 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     this.defaultTextStyle = {
       ...defaultTextStyle,
       ...(options && options.textStyle)
+    };
+    this.defaultLineStyle = {
+      ...defaultLineStyle,
+      ...(options && options.lineStyle)
     };
   }
 

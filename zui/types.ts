@@ -51,6 +51,9 @@ export interface ReactivePoint2D {
   y: Reactive<number> | number;
 }
 
+/**
+ * A bounding box that is used to memorize pixels within any widget.
+ */
 export interface BoundingBox {
   left: number;
   right: number;

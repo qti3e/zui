@@ -118,6 +118,10 @@ function render() {
   updatedCanvases.clear();
 }
 
+/**
+ * Generate a dot graph representing the current state of the entire system, it
+ * is used for debugging purposes.
+ */
 export function toViz(): string {
   let lines: string[] = [
     "digraph zui {",

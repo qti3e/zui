@@ -5,7 +5,8 @@ import {
   Color,
   Shadow,
   Reactive,
-  Painter
+  Painter,
+  Colors
 } from "../../zui";
 import grin from "../../icons/edit.svg";
 
@@ -13,7 +14,7 @@ class SidebarButton extends Widget {
   private readonly updater = new Reactive(0, this);
 
   style: ZuiStyle = {
-    background: Color.Transparent
+    background: Colors.transparent
   };
 
   width = 48;
@@ -33,7 +34,7 @@ class SidebarButton extends Widget {
   }
 
   handleMouseOut() {
-    this.style.background = Color.Transparent;
+    this.style.background = Colors.transparent;
     this.updater.set(Math.random());
   }
 

@@ -1,4 +1,4 @@
-import { BorderRadius } from "./style";
+import { BorderRadius } from "./border";
 
 /**
  * @internal
