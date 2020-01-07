@@ -31,3 +31,24 @@ gulp.task("build:html", function() {
 });
 
 gulp.task("build", gulp.series("build:js", "build:html"));
+
+gulp.task("zui", function() {
+  const rollupOptions = {
+    external: [],
+    plugins: [
+      resolve({
+        preferBuiltins: true
+      }),
+      typescript({
+        target: "esnext",
+        module: "ESNext"
+      })
+    ]
+  };
+
+  return gulp
+    .src("./zui/index.ts")
+    .pipe(rollup(rollupOptions, "cjs"))
+    .pipe(rename("zui.js"))
+    .pipe(gulp.dest("./dist"));
+});

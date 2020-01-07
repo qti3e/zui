@@ -1,0 +1,11 @@
+digraph zui {
+  ratio = fill;
+  node [style=filled];
+  subgraph WidgetTree {
+    label = "Widget Tree";
+    color = "blue;"
+  }
+  "IteratorHandler #0" -> "ZuiBinaryComputationUnit #0";
+  "IteratorHandler #1" -> "ZuiBinaryComputationUnit #0";
+  "ZuiBinaryComputationUnit #0" -> "Reactive #0";
+}

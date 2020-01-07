@@ -21,15 +21,23 @@ export class ZuiBinaryComputationUnit
     readonly lhs: ZuiNumber,
     readonly rhs: ZuiNumber
   ) {
-    if (typeof lhs === "number") this.lhsValue = lhs;
-    else if (lhs instanceof Reactive) this.lhsValue = lhs.get();
-    else if (lhs instanceof ZuiBinaryComputationUnit)
-      this.lhsValue = lhs.current();
+    if (typeof lhs === "number") {
+      this.lhsValue = lhs;
+    } else {
+      if (lhs instanceof Reactive) this.lhsValue = lhs.get();
+      else if (lhs instanceof ZuiBinaryComputationUnit)
+        this.lhsValue = lhs.current();
+      connect(lhs, this);
+    }
 
-    if (typeof rhs === "number") this.rhsValue = rhs;
-    else if (rhs instanceof Reactive) this.rhsValue = rhs.get();
-    else if (rhs instanceof ZuiBinaryComputationUnit)
-      this.rhsValue = rhs.current();
+    if (typeof rhs === "number") {
+      this.rhsValue = rhs;
+    } else {
+      if (rhs instanceof Reactive) this.rhsValue = rhs.get();
+      else if (rhs instanceof ZuiBinaryComputationUnit)
+        this.rhsValue = rhs.current();
+      connect(rhs, this);
+    }
 
     this.value = compute(this.lhsValue, this.rhsValue);
   }
@@ -45,6 +53,7 @@ export class ZuiBinaryComputationUnit
 
   poll() {
     if (!this.changed) return undefined;
+    this.changed = false;
     return this.value;
   }
 

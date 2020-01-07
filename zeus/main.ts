@@ -1,8 +1,10 @@
 import * as zui from "../zui";
 import { App } from "./widgets/app";
+import { initDimension } from "../zui";
 
 // Create canvas.
 
+initDimension();
 const canvas = new zui.Canvas(window.innerWidth, window.innerHeight);
 canvas.addWidget(0, 0, new App());
 
