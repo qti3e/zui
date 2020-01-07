@@ -2,7 +2,6 @@ export * from "./DFG";
 export * from "./filter";
 export * from "./map";
 export * from "./combine";
-export * from "./iterate";
 export * from "./iterator";
 export * from "./event";
 export * from "./reactive";
