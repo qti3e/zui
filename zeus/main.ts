@@ -20,8 +20,10 @@ zui.connect(
   zui.combine(
     zui.map(
       zui.event("wheel", canvas.domElement),
-      event =>
+      event => (
+        event.preventDefault(),
         new zui.ZuiWheelEvent(event.x, event.y, event.deltaX, event.deltaY)
+      )
     ),
     zui.map(
       zui.event("click", canvas.domElement),

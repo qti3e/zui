@@ -81,15 +81,11 @@ export class TypesEditorView extends Widget {
 
     this.addChild(this.nodeEditor);
 
-    addChild(0, 0, 0);
-    addChild(200, 100, 1);
-    addChild(2500, 100, 2);
-    addChild(4700, 100, 3);
-    addChild(4700, 2950, 4);
-
-    addChild(200, 400, 5);
-    addChild(400, 100, 6);
-    addChild(400, 600, 6);
+    for (let i = 0; i < 30; ++i) {
+      const x = (Math.random() * 4700) | 0;
+      const y = (Math.random() * 2950) | 0;
+      addChild(x, y, i);
+    }
   }
 
   draw() {}

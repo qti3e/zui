@@ -1,8 +1,8 @@
-import { Widget } from "./widget";
-import { Reactive } from "./reactive";
-import { Painter } from "./painter";
-import { ZuiStyle } from "./style";
-import { add, r } from "./math";
+import { Widget } from "../widget";
+import { Reactive } from "../reactive";
+import { Painter } from "../painter";
+import { ZuiStyle } from "../style";
+import { add, r } from "../math";
 
 // A node editor.
 

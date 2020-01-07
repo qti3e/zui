@@ -11,6 +11,8 @@ type DFGEdge<T = unknown> = {
 const updatedCanvases: Set<Canvas> = new Set();
 let DFG: DFGEdge[] = [];
 
+(window as any)["zuiDFG"] = DFG;
+
 /**
  * Connect an emitter to a widget, it will make the widget be redrawn every time
  * emitter emits a new data.
@@ -63,32 +65,30 @@ export function detach(node: ZuiReceiver | ZuiEmitter | Widget) {
  * Handle the next tick, emits new data to the receivers.
  */
 export function handleNextTick() {
-  const seen = new Set<ZuiEmitter>();
+  const dataCache = new Map<ZuiEmitter, unknown[]>();
 
-  for (let i = 0; i < DFG.length; ++i) {
-    const emitter = DFG[i].emitter;
+  for (const { emitter, receiver } of DFG) {
+    const cached = dataCache.get(emitter);
+    let data: unknown[];
 
-    if (seen.has(emitter)) continue;
-    seen.add(emitter);
-
-    const data: unknown[] = [];
-
-    let tmp = emitter.poll();
-    while (tmp !== undefined && data.length < emitter.maxPerFrame) {
-      data.push(tmp);
-      tmp = emitter.poll();
+    if (cached) {
+      data = cached;
+    } else {
+      data = [];
+      dataCache.set(emitter, data);
+      let tmp = emitter.poll();
+      while (tmp !== undefined && data.length < emitter.maxPerFrame) {
+        data.push(tmp);
+        tmp = emitter.poll();
+      }
     }
 
     if (data.length === 0) continue;
 
-    for (let j = i; j < DFG.length; ++j) {
-      if (DFG[j].emitter !== emitter) continue;
-      const receiver = DFG[j].receiver;
-      if (receiver instanceof Widget) {
-        notify(receiver);
-      } else {
-        for (const d of data) receiver.receive(d, emitter);
-      }
+    if (receiver instanceof Widget) {
+      notify(receiver);
+    } else {
+      for (const d of data) receiver.receive(d, emitter);
     }
   }
 

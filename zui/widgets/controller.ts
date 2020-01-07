@@ -1,10 +1,10 @@
-import { Widget } from "./widget";
-import { Reactive } from "./reactive";
-import { div, sub, add, neg, mul, r } from "./math";
-import { ZuiStyle } from "./style";
-import { connect } from "./DFG";
-import { Color } from "./color";
-import { Shadow } from "./shadow";
+import { Widget } from "../widget";
+import { Reactive } from "../reactive";
+import { div, sub, add, neg, mul, r } from "../math";
+import { ZuiStyle } from "../style";
+import { connect } from "../DFG";
+import { Color } from "../color";
+import { Shadow } from "../shadow";
 
 const MiniMapWidth = 180;
 
@@ -46,24 +46,13 @@ class MiniMap extends Widget {
     const ratio = div(containedWidth, MiniMapWidth);
     this.height = r(div(containedHeight, ratio), this);
 
-    // Currently this computation adds 21 edges to the DFG, maybe we need to
-    // optimize this, by having 4 private reactive variable (width, height,
-    // x, y) and update the values on every draw.
-    // Another proposal is grouped computations like:
-    // const {x, y, width, height} = grouped([...vars we depend on],
-    // ([...vars in the same order]) => {
-    //     x: ..., (produce a js number)
-    //     y: ...,
-    // })
     const sr = mul(scale, ratio);
-    const width = div(viewWidth, sr);
-    const height = div(viewHeight, sr);
-    const x = neg(div(offsetX, sr));
-    const y = neg(div(offsetY, sr));
+    const width = r(div(viewWidth, sr), this);
+    const height = r(div(viewHeight, sr), this);
 
-    const area = new MiniMapArea(r(width, this), r(height, this));
-    connect(x, area.x);
-    connect(y, area.y);
+    const area = new MiniMapArea(width, height);
+    connect(neg(div(offsetX, sr)), area.x);
+    connect(neg(div(offsetY, sr)), area.y);
 
     this.addChild(area);
   }
@@ -80,22 +69,14 @@ class MiniMap extends Widget {
   }
 }
 
-export class Scaled extends Widget {
+class Scaled extends Widget {
   readonly width: number | Reactive<number>;
   readonly height: number | Reactive<number>;
 
-  constructor(
-    x: Reactive<number>,
-    y: Reactive<number>,
-    readonly child: Widget,
-    readonly scale: Reactive<number>
-  ) {
+  constructor(readonly child: Widget, readonly scale: Reactive<number>) {
     super();
     this.width = child.width;
     this.height = child.height;
-    connect(scale, this);
-    connect(x, child.x);
-    connect(y, child.y);
     this.addChild(child);
   }
 
@@ -114,14 +95,10 @@ export class Controller extends Widget {
   ) {
     super();
 
-    this.addChild(
-      new Scaled(
-        r(div(this.xOffset, this.currentScale)),
-        r(div(this.yOffset, this.currentScale)),
-        widget,
-        this.currentScale
-      )
-    );
+    const scaled = new Scaled(widget, this.currentScale);
+    connect(div(this.xOffset, this.currentScale), scaled.x);
+    connect(div(this.yOffset, this.currentScale), scaled.y);
+    this.addChild(scaled);
 
     const miniMap = new MiniMap(
       width,
