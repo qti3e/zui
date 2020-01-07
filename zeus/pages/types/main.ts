@@ -12,7 +12,8 @@ import {
   NodeEditor,
   Reactive,
   add,
-  NodeEditorNode
+  NodeEditorNode,
+  r
 } from "../../../zui";
 
 export class TypeNode extends Widget {
@@ -99,7 +100,7 @@ export class TypesEditorView extends Widget {
 }
 
 export class TypesEditor extends Widget {
-  width = sub(pageWidth, 48, this);
+  width = r(sub(pageWidth, 48), this);
   height = pageHeight;
 
   constructor() {

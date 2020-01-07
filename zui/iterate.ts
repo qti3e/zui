@@ -9,7 +9,7 @@ type IterateCallback<T> = (data: T) => void;
  * @param emitter The data source.
  * @param callback The callback function.
  */
-export function iterate<T>(
+function iterate<T>(
   emitter: ZuiEmitter<T>,
   callback: IterateCallback<T>
 ): ZuiReceiver<T> {

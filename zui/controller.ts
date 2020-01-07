@@ -1,6 +1,6 @@
 import { Widget } from "./widget";
 import { Reactive } from "./reactive";
-import { div, sub, add, neg, mul } from "./math";
+import { div, sub, add, neg, mul, r } from "./math";
 import { ZuiStyle } from "./style";
 import { connect } from "./DFG";
 import { Color } from "./color";
@@ -44,7 +44,7 @@ class MiniMap extends Widget {
     super();
 
     const ratio = div(containedWidth, MiniMapWidth);
-    this.height = div(containedHeight, ratio);
+    this.height = r(div(containedHeight, ratio), this);
 
     // Currently this computation adds 21 edges to the DFG, maybe we need to
     // optimize this, by having 4 private reactive variable (width, height,
@@ -61,7 +61,7 @@ class MiniMap extends Widget {
     const x = neg(div(offsetX, sr));
     const y = neg(div(offsetY, sr));
 
-    const area = new MiniMapArea(width, height);
+    const area = new MiniMapArea(r(width, this), r(height, this));
     connect(x, area.x);
     connect(y, area.y);
 
@@ -116,8 +116,8 @@ export class Controller extends Widget {
 
     this.addChild(
       new Scaled(
-        div(this.xOffset, this.currentScale),
-        div(this.yOffset, this.currentScale),
+        r(div(this.xOffset, this.currentScale)),
+        r(div(this.yOffset, this.currentScale)),
         widget,
         this.currentScale
       )

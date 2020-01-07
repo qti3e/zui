@@ -1,111 +1,126 @@
-import { ZuiEmitter } from "./types";
+import { ZuiReceiver, ZuiEmitter } from "./types";
 import { Reactive } from "./reactive";
-import { iterate } from "./iterate";
-import { Widget } from "./widget";
+import { map } from "./map";
 import { connect } from "./DFG";
+import { Widget } from "./widget";
 
 type ZuiNumber = number | ZuiEmitter<number>;
 
-function getValue(n: ZuiNumber) {
-  if (typeof n === "number") return n;
-  if (n instanceof Reactive) return n.get();
-  return NaN;
+type ComputeCallback = (lhs: number, rhs: number) => number;
+
+export class ZuiBinaryComputationUnit
+  implements ZuiReceiver<number>, ZuiEmitter<number> {
+  maxPerFrame = 1;
+  private lhsValue: number = NaN;
+  private rhsValue: number = NaN;
+  private value: number;
+  private changed = true;
+
+  constructor(
+    readonly compute: ComputeCallback,
+    readonly lhs: ZuiNumber,
+    readonly rhs: ZuiNumber
+  ) {
+    if (typeof lhs === "number") this.lhsValue = lhs;
+    else if (lhs instanceof Reactive) this.lhsValue = lhs.get();
+    else if (lhs instanceof ZuiBinaryComputationUnit)
+      this.lhsValue = lhs.current();
+
+    if (typeof rhs === "number") this.rhsValue = rhs;
+    else if (rhs instanceof Reactive) this.rhsValue = rhs.get();
+    else if (rhs instanceof ZuiBinaryComputationUnit)
+      this.rhsValue = rhs.current();
+
+    this.value = compute(this.lhsValue, this.rhsValue);
+  }
+
+  receive(data: number, source: ZuiEmitter<number>) {
+    if (source === this.lhs) this.lhsValue = data;
+    if (source === this.rhs) this.rhsValue = data;
+    const value = this.compute(this.lhsValue, this.rhsValue);
+    if (value === this.value) return;
+    this.changed = true;
+    this.value = value;
+  }
+
+  poll() {
+    if (!this.changed) return undefined;
+    return this.value;
+  }
+
+  current() {
+    return this.value;
+  }
 }
 
-export function neg(a: ZuiEmitter<number>, widget?: Widget): Reactive<number> {
-  const value = new Reactive(-getValue(a));
-  iterate(a, v => value.set(-v));
-  if (widget) connect(value, widget);
-  return value;
+export function add(lhs: ZuiNumber, rhs: ZuiNumber): ZuiEmitter<number> {
+  return new ZuiBinaryComputationUnit(
+    (l: number, r: number) => l + r,
+    lhs,
+    rhs
+  );
 }
 
-export function add(
-  a: ZuiNumber,
-  b: ZuiNumber,
-  widget?: Widget
-): Reactive<number> {
-  let x: number, y: number;
-  const value = new Reactive((x = getValue(a)) + (y = getValue(b)));
-  if (typeof a !== "number") iterate(a, v => value.set((x = v) + y));
-  if (typeof b !== "number") iterate(b, v => value.set(x + (y = v)));
-  if (widget) connect(value, widget);
-  return value;
+export function sub(lhs: ZuiNumber, rhs: ZuiNumber): ZuiEmitter<number> {
+  return new ZuiBinaryComputationUnit(
+    (l: number, r: number) => l - r,
+    lhs,
+    rhs
+  );
 }
 
-export function sub(
-  a: ZuiNumber,
-  b: ZuiNumber,
-  widget?: Widget
-): Reactive<number> {
-  let x: number, y: number;
-  const value = new Reactive((x = getValue(a)) - (y = getValue(b)));
-  if (typeof a !== "number") iterate(a, v => value.set((x = v) - y));
-  if (typeof b !== "number") iterate(b, v => value.set(x - (y = v)));
-  if (widget) connect(value, widget);
-  return value;
+export function mul(lhs: ZuiNumber, rhs: ZuiNumber): ZuiEmitter<number> {
+  return new ZuiBinaryComputationUnit(
+    (l: number, r: number) => l * r,
+    lhs,
+    rhs
+  );
 }
 
-export function mul(
-  a: ZuiNumber,
-  b: ZuiNumber,
-  widget?: Widget
-): Reactive<number> {
-  let x: number, y: number;
-  const value = new Reactive((x = getValue(a)) * (y = getValue(b)));
-  if (typeof a !== "number") iterate(a, v => value.set((x = v) * y));
-  if (typeof b !== "number") iterate(b, v => value.set(x * (y = v)));
-  if (widget) connect(value, widget);
-  return value;
+export function div(lhs: ZuiNumber, rhs: ZuiNumber): ZuiEmitter<number> {
+  return new ZuiBinaryComputationUnit(
+    (l: number, r: number) => l / r,
+    lhs,
+    rhs
+  );
 }
 
-export function div(
-  a: ZuiNumber,
-  b: ZuiNumber,
-  widget?: Widget
-): Reactive<number> {
-  let x: number, y: number;
-  const value = new Reactive((x = getValue(a)) / (y = getValue(b)));
-  if (typeof a !== "number") iterate(a, v => value.set((x = v) / y));
-  if (typeof b !== "number") iterate(b, v => value.set(x / (y = v)));
-  if (widget) connect(value, widget);
-  return value;
+export function pow(lhs: ZuiNumber, rhs: ZuiNumber): ZuiEmitter<number> {
+  return new ZuiBinaryComputationUnit(
+    (l: number, r: number) => l ** r,
+    lhs,
+    rhs
+  );
 }
 
-export function pow(
-  a: ZuiNumber,
-  b: ZuiNumber,
-  widget?: Widget
-): Reactive<number> {
-  let x: number, y: number;
-  const value = new Reactive((x = getValue(a)) ** (y = getValue(b)));
-  if (typeof a !== "number") iterate(a, v => value.set((x = v) ** y));
-  if (typeof b !== "number") iterate(b, v => value.set(x ** (y = v)));
-  if (widget) connect(value, widget);
-  return value;
+export function max(lhs: ZuiNumber, rhs: ZuiNumber): ZuiEmitter<number> {
+  return new ZuiBinaryComputationUnit(
+    (l: number, r: number) => (l > r ? l : r),
+    lhs,
+    rhs
+  );
 }
 
-export function max(
-  a: ZuiNumber,
-  b: ZuiNumber,
-  widget?: Widget
-): Reactive<number> {
-  let x: number, y: number;
-  const value = new Reactive(Math.max((x = getValue(a)), (y = getValue(b))));
-  if (typeof a !== "number") iterate(a, v => value.set(Math.max((x = v), y)));
-  if (typeof b !== "number") iterate(b, v => value.set(Math.max(x, (y = v))));
-  if (widget) connect(value, widget);
-  return value;
+export function min(lhs: ZuiNumber, rhs: ZuiNumber): ZuiEmitter<number> {
+  return new ZuiBinaryComputationUnit(
+    (l: number, r: number) => (l < r ? l : r),
+    lhs,
+    rhs
+  );
 }
 
-export function min(
-  a: ZuiNumber,
-  b: ZuiNumber,
-  widget?: Widget
-): Reactive<number> {
-  let x: number, y: number;
-  const value = new Reactive(Math.min((x = getValue(a)), (y = getValue(b))));
-  if (typeof a !== "number") iterate(a, v => value.set(Math.min((x = v), y)));
-  if (typeof b !== "number") iterate(b, v => value.set(Math.min(x, (y = v))));
-  if (widget) connect(value, widget);
-  return value;
+export function neg(number: ZuiEmitter<number>): ZuiEmitter<number> {
+  return map(number, n => -n);
+}
+
+export function r(emitter: ZuiEmitter<number>, widget?: Widget) {
+  if (emitter instanceof Reactive) {
+    if (widget) connect(emitter, widget);
+    return emitter;
+  }
+  const value =
+    emitter instanceof ZuiBinaryComputationUnit ? emitter.current() : NaN;
+  const reactive = new Reactive(value, widget);
+  connect(emitter, reactive);
+  return reactive;
 }

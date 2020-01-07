@@ -2,7 +2,7 @@ import { Widget } from "./widget";
 import { Reactive } from "./reactive";
 import { Painter } from "./painter";
 import { ZuiStyle } from "./style";
-import { add } from "./math";
+import { add, r } from "./math";
 
 // A node editor.
 
@@ -29,8 +29,8 @@ export class NodeEditorNode<T> extends Widget {
     super();
     this.width = radius * 2;
     this.height = radius * 2;
-    this.X = add(container.x, add(this.x, radius));
-    this.Y = add(container.y, add(this.y, radius));
+    this.X = r(add(container.x, add(this.x, radius)), this);
+    this.Y = r(add(container.y, add(this.y, radius)), this);
   }
 
   handleMouseDown() {

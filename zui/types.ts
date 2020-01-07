@@ -23,8 +23,9 @@ export interface ZuiReceiver<T = unknown> {
    * Handle the received data.
    *
    * @param data
+   * @param source
    */
-  receive(data: T): void;
+  receive(data: T, source: ZuiEmitter<T>): void;
 }
 
 /**

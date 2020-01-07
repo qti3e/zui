@@ -87,7 +87,7 @@ export function handleNextTick() {
       if (receiver instanceof Widget) {
         notify(receiver);
       } else {
-        for (const d of data) receiver.receive(d);
+        for (const d of data) receiver.receive(d, emitter);
       }
     }
   }
