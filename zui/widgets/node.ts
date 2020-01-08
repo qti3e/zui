@@ -52,6 +52,14 @@ export class NodeEditorNode<T> extends Widget {
   }
 
   draw() {}
+
+  static connect<T>(from: NodeEditorNode<T>, to: NodeEditorNode<T>) {
+    if (from.editor !== to.editor) throw new Error("Both nodes must be in the same node editor.");
+    if (from.mode !== "out") throw new Error("Expected an output node.");
+    if (to.mode !== "in") throw new Error("Expected an input node.");
+    from.editor.start(from.data, from.X, from.Y, from.direction);
+    to.editor.accept(to.data, to.X, to.Y, to.direction);
+  }
 }
 
 export class NodeEditor<T = unknown> extends Widget {
@@ -69,6 +77,13 @@ export class NodeEditor<T = unknown> extends Widget {
     super();
     this.width = widget.width;
     this.height = widget.height;
+  }
+
+  getGraph(): [T, T][] {
+    const result: [T, T][] = [];
+    for (const [from, to] of this.edges)
+      result.push([from.data, to.data]);
+    return result;
   }
 
   start(
