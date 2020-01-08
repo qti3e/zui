@@ -4,6 +4,8 @@ import { Painter } from "../painter";
 import { ZuiStyle } from "../style";
 import { add, r } from "../math";
 import { Line } from "../lines";
+import { BorderRadius } from "../border";
+import { Color } from "../color";
 
 // A node editor.
 
@@ -24,6 +26,7 @@ interface Node<T> {
 export class NodeEditorNode<T> extends Widget {
   readonly width: number;
   readonly height: number;
+  readonly style: ZuiStyle;
   private X: Reactive<number>;
   private Y: Reactive<number>;
 
@@ -33,14 +36,23 @@ export class NodeEditorNode<T> extends Widget {
     readonly data: T,
     readonly mode: "in" | "out",
     readonly direction: NodeDirection,
-    readonly style: ZuiStyle | undefined = undefined,
-    readonly radius: number = 10
+    readonly radius: number = 10,
+    style?: ZuiStyle | Color
   ) {
     super();
     this.width = radius * 2;
     this.height = radius * 2;
     this.X = r(add(container.x, add(this.x, radius)), this);
     this.Y = r(add(container.y, add(this.y, radius)), this);
+
+    if (style instanceof Color)
+      style = {
+        background: style
+      };
+    this.style = {
+      borderRadius: BorderRadius.All(radius),
+      ...style
+    };
   }
 
   handleMouseDown() {
@@ -54,7 +66,8 @@ export class NodeEditorNode<T> extends Widget {
   draw() {}
 
   static connect<T>(from: NodeEditorNode<T>, to: NodeEditorNode<T>) {
-    if (from.editor !== to.editor) throw new Error("Both nodes must be in the same node editor.");
+    if (from.editor !== to.editor)
+      throw new Error("Both nodes must be in the same node editor.");
     if (from.mode !== "out") throw new Error("Expected an output node.");
     if (to.mode !== "in") throw new Error("Expected an input node.");
     from.editor.start(from.data, from.X, from.Y, from.direction);
@@ -81,8 +94,7 @@ export class NodeEditor<T = unknown> extends Widget {
 
   getGraph(): [T, T][] {
     const result: [T, T][] = [];
-    for (const [from, to] of this.edges)
-      result.push([from.data, to.data]);
+    for (const [from, to] of this.edges) result.push([from.data, to.data]);
     return result;
   }
 

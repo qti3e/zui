@@ -1,6 +1,6 @@
 import * as zui from "../zui";
 import { App } from "./widgets/app";
-import { initDimension } from "../zui";
+import { initDimension, ZuiKeyupEvent } from "../zui";
 
 // Create canvas.
 
@@ -44,6 +44,14 @@ zui.connect(
     zui.map(
       zui.event("resize", window),
       () => new zui.ZuiResizeEvent(window.innerWidth, window.innerHeight)
+    ),
+    zui.map(
+      zui.event("keydown", window),
+      event => new zui.ZuiKeydownEvent(event.keyCode, event.key)
+    ),
+    zui.map(
+      zui.event("keyup", window),
+      event => new zui.ZuiKeyupEvent(event.keyCode, event.key)
     )
   ),
   canvas

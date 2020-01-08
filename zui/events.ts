@@ -20,6 +20,14 @@ export class ZuiClickEvent implements Point2D {
   constructor(readonly x: number, readonly y: number) {}
 }
 
+export class ZuiKeydownEvent {
+  constructor(readonly keycode: number, readonly key: string) {}
+}
+
+export class ZuiKeyupEvent {
+  constructor(readonly keycode: number, readonly key: string) {}
+}
+
 export class ZuiWheelEvent implements Point2D {
   constructor(
     readonly x: number,
@@ -35,4 +43,6 @@ export type CanvasEvent =
   | ZuiMouseUpEvent
   | ZuiMouseMoveEvent
   | ZuiClickEvent
-  | ZuiWheelEvent;
+  | ZuiWheelEvent
+  | ZuiKeydownEvent
+  | ZuiKeyupEvent;

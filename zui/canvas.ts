@@ -10,7 +10,9 @@ import {
   ZuiWheelEvent,
   CanvasEvent,
   ZuiMouseDownEvent,
-  ZuiMouseUpEvent
+  ZuiMouseUpEvent,
+  ZuiKeydownEvent,
+  ZuiKeyupEvent
 } from "./events";
 import { Colors } from "./colors";
 import { Shadow } from "./shadow";
@@ -174,6 +176,8 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       | "handleMouseDown"
       | "handleMouseUp"
       | "handleMouseMove"
+      | "handleKeydown"
+      | "handleKeyup"
     )[]
   ): Widget[] {
     if (event.length < 1 || event.length > 4)
@@ -303,6 +307,14 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
         const { x, y } = this.getCordsWithInWidget(event, widget);
         widget.handleMouseUp!(x, y);
       }
+    }
+
+    if (event instanceof ZuiKeydownEvent) {
+      console.log(event);
+    }
+
+    if (event instanceof ZuiKeyupEvent) {
+      console.log(event);
     }
   }
 

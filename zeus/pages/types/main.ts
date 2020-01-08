@@ -14,7 +14,8 @@ import {
   add,
   NodeEditorNode,
   r,
-  NodeDirection
+  NodeDirection,
+  Colors
 } from "../../../zui";
 
 export class TypeNode extends Widget {
@@ -33,10 +34,17 @@ export class TypeNode extends Widget {
   ) {
     super();
 
-    const out = new NodeEditorNode(ne, this, this, "out", NodeDirection.Right, {
-      background: Color.HEX(0, 0.3),
-      borderRadius: BorderRadius.All(10)
-    });
+    const out = new NodeEditorNode(
+      ne,
+      this,
+      this,
+      "out",
+      NodeDirection.Right,
+      10,
+      {
+        background: Color.HEX(0, 0.3)
+      }
+    );
 
     out.y.set(15);
     out.x.set(270);
@@ -48,10 +56,8 @@ export class TypeNode extends Widget {
       this,
       "in",
       NodeDirection.Left,
-      {
-        background: Color.HEX(0x00ff00, 0.3),
-        borderRadius: BorderRadius.All(10)
-      }
+      10,
+      Colors.purple
     );
     inputNode.y.set(15);
     inputNode.x.set(20);

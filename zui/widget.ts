@@ -98,4 +98,30 @@ export abstract class Widget {
    * @param deltaY A double representing the vertical scroll amount.
    */
   handleWheel?(deltaX: number, deltaY: number): void;
+
+  /**
+   * Handle the keydown event.
+   *
+   * @param keycode
+   * @param char
+   * @param keys
+   */
+  handleKeydown?(
+    keycode: number,
+    char: string | null,
+    keys: { meta: boolean; ctrl: boolean; alt: boolean; shift: boolean }
+  ): void;
+
+  /**
+   * Handle the keyup event.
+   *
+   * @param keycode
+   * @param char
+   * @param keys
+   */
+  handleKeyup?(
+    keycode: number,
+    char: string | null,
+    keys: { meta: boolean; ctrl: boolean; alt: boolean; shift: boolean }
+  ): void;
 }
