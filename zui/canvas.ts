@@ -411,7 +411,8 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
         context,
         this.translateX,
         this.translateY,
-        this.defaultTextStyle
+        this.defaultTextStyle,
+        this.defaultLineStyle
       )
     );
 

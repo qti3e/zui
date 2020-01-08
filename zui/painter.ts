@@ -1,17 +1,27 @@
 import { Reactive } from "./reactive";
-import { ZuiTextStyle } from "./style";
+import { ZuiTextStyle, ZuiLineStyle } from "./style";
 import { Text } from "./text";
 import { Color } from "./color";
 import { Colors } from "./colors";
-
-type Pixel = number | Reactive<number>;
+import {
+  Line,
+  drawVerticalRLine,
+  drawTopDownLine,
+  drawClaspLeft,
+  drawRightLeftLine,
+  drawHorizontalLine,
+  drawCornerTopLine,
+  drawCornerDownLine,
+  drawLeftRightLine
+} from "./lines";
 
 export class Painter {
   constructor(
     private readonly backend: CanvasRenderingContext2D,
     private readonly translateX: number,
     private readonly translateY: number,
-    private readonly defaultTextStyle: Required<ZuiTextStyle>
+    private readonly defaultTextStyle: Required<ZuiTextStyle>,
+    private readonly defaultLineStyle: Required<ZuiLineStyle>
   ) {}
 
   drawZuiPath(
@@ -65,24 +75,56 @@ export class Painter {
     text.render(this.backend, this.defaultTextStyle, x, y);
   }
 
-  line(x1: number, y1: number, x2: number, y2: number) {
+  line(line: Line, style?: ZuiLineStyle) {
     const ctx = this.backend;
-    ctx.strokeStyle = "#ff0000";
-    ctx.lineWidth = 5;
+    ctx.strokeStyle = (
+      (style && style.color) ||
+      this.defaultLineStyle.color
+    ).toString();
+    ctx.lineWidth = (style && style.width) || this.defaultLineStyle.width;
+    const shadow = (style && style.shadow) || this.defaultLineStyle.shadow;
+    ctx.shadowOffsetX = shadow.offsetX;
+    ctx.shadowOffsetY = shadow.offsetY;
+    ctx.shadowBlur = shadow.blur;
+    ctx.shadowColor = shadow.color.toString();
 
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    const x0 = line.from.x;
+    const y0 = line.from.y;
+    const x1 = line.to.x;
+    const y1 = line.to.y;
 
-    ctx.stroke();
-  }
+    ctx.beginPath();
 
-  bezierAB(x1: number, y1: number, x2: number, y2: number) {
-    const ctx = this.backend;
-    ctx.strokeStyle = "#00ff00";
-    ctx.lineWidth = 5;
-
-    ctx.moveTo(x1, y1);
-    ctx.bezierCurveTo(x2, y1, x1, y2, x2, y2);
+    switch (line.type) {
+      case "straight":
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        break;
+      case "verticalR":
+        drawVerticalRLine(ctx, x0, y0, x1, y1);
+        break;
+      case "topDown":
+        drawTopDownLine(ctx, x0, y0, x1, y1);
+        break;
+      case "claspLeft":
+        drawClaspLeft(ctx, x0, y0, x1, y1);
+        break;
+      case "rightLeft":
+        drawRightLeftLine(ctx, x0, y0, x1, y1);
+        break;
+      case "leftRight":
+        drawLeftRightLine(ctx, x0, y0, x1, y1);
+        break;
+      case "horizontalR":
+        drawHorizontalLine(ctx, y0, x0, x1);
+        break;
+      case "cornerTop":
+        drawCornerTopLine(ctx, x0, y0, x1, y1);
+        break;
+      case "cornerDown":
+        drawCornerDownLine(ctx, x0, y0, x1, y1);
+        break;
+    }
 
     ctx.stroke();
   }

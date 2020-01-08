@@ -13,7 +13,8 @@ import {
   Reactive,
   add,
   NodeEditorNode,
-  r
+  r,
+  NodeDirection
 } from "../../../zui";
 
 export class TypeNode extends Widget {
@@ -32,7 +33,7 @@ export class TypeNode extends Widget {
   ) {
     super();
 
-    const out = new NodeEditorNode(ne, this, this, "out", {
+    const out = new NodeEditorNode(ne, this, this, "out", NodeDirection.Right, {
       background: Color.HEX(0, 0.3),
       borderRadius: BorderRadius.All(10)
     });
@@ -41,10 +42,17 @@ export class TypeNode extends Widget {
     out.x.set(270);
     this.addChild(out);
 
-    const inputNode = new NodeEditorNode(ne, this, this, "in", {
-      background: Color.HEX(0x00ff00, 0.3),
-      borderRadius: BorderRadius.All(10)
-    });
+    const inputNode = new NodeEditorNode(
+      ne,
+      this,
+      this,
+      "in",
+      NodeDirection.Left,
+      {
+        background: Color.HEX(0x00ff00, 0.3),
+        borderRadius: BorderRadius.All(10)
+      }
+    );
     inputNode.y.set(15);
     inputNode.x.set(20);
     this.addChild(inputNode);

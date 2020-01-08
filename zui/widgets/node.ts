@@ -3,13 +3,22 @@ import { Reactive } from "../reactive";
 import { Painter } from "../painter";
 import { ZuiStyle } from "../style";
 import { add, r } from "../math";
+import { Line } from "../lines";
 
 // A node editor.
+
+export enum NodeDirection {
+  Left,
+  Right,
+  Top,
+  Bottom
+}
 
 interface Node<T> {
   data: T;
   x: Reactive<number>;
   y: Reactive<number>;
+  direction: NodeDirection;
 }
 
 export class NodeEditorNode<T> extends Widget {
@@ -23,6 +32,7 @@ export class NodeEditorNode<T> extends Widget {
     readonly container: Widget,
     readonly data: T,
     readonly mode: "in" | "out",
+    readonly direction: NodeDirection,
     readonly style: ZuiStyle | undefined = undefined,
     readonly radius: number = 10
   ) {
@@ -35,9 +45,9 @@ export class NodeEditorNode<T> extends Widget {
 
   handleMouseDown() {
     if (this.mode === "out") {
-      this.editor.start(this.data, this.X, this.Y);
+      this.editor.start(this.data, this.X, this.Y, this.direction);
     } else {
-      this.editor.accept(this.data, this.X, this.Y);
+      this.editor.accept(this.data, this.X, this.Y, this.direction);
     }
   }
 
@@ -53,6 +63,7 @@ export class NodeEditor<T = unknown> extends Widget {
   private updated = new Reactive<number>(0, this);
   private mouseX = new Reactive<number>(0, this);
   private mouseY = new Reactive<number>(0, this);
+  private mouseToNode: Node<undefined> | undefined;
 
   constructor(readonly widget: Widget) {
     super();
@@ -60,16 +71,38 @@ export class NodeEditor<T = unknown> extends Widget {
     this.height = widget.height;
   }
 
-  start(data: T, x: Reactive<number>, y: Reactive<number>) {
-    this.current = { data, x, y };
+  start(
+    data: T,
+    x: Reactive<number>,
+    y: Reactive<number>,
+    direction: NodeDirection
+  ) {
+    this.current = { data, x, y, direction };
     this.mouseX.set(x.valueOf());
     this.mouseY.set(y.valueOf());
     this.updated.set(Math.random());
+    const toDirection = {
+      [NodeDirection.Left]: NodeDirection.Right,
+      [NodeDirection.Right]: NodeDirection.Left,
+      [NodeDirection.Top]: NodeDirection.Bottom,
+      [NodeDirection.Bottom]: NodeDirection.Top
+    }[this.current.direction];
+    this.mouseToNode = {
+      data: undefined,
+      x: this.mouseX,
+      y: this.mouseY,
+      direction: toDirection
+    };
   }
 
-  accept(data: T, x: Reactive<number>, y: Reactive<number>) {
+  accept(
+    data: T,
+    x: Reactive<number>,
+    y: Reactive<number>,
+    direction: NodeDirection
+  ) {
     if (!this.current) return;
-    const node = { data, x, y };
+    const node = { data, x, y, direction };
     this.edges.push([this.current, node]);
     this.current = undefined;
     this.updated.set(Math.random());
@@ -83,24 +116,56 @@ export class NodeEditor<T = unknown> extends Widget {
 
   handleMouseDown() {
     this.current = undefined;
+    this.mouseToNode = undefined;
     this.updated.set(Math.random());
   }
 
-  draw(painter: Painter) {
-    for (const [from, to] of this.edges) {
-      const fromX = from.x.valueOf();
-      const fromY = from.y.valueOf();
-      const toX = to.x.valueOf();
-      const toY = to.y.valueOf();
-      painter.bezierAB(fromX, fromY, toX, toY);
-    }
+  drawEdge(painter: Painter, from: Node<T>, to: Node<T | undefined>) {
+    const line: Line = {
+      type: "straight",
+      from: { x: from.x.valueOf(), y: from.y.valueOf() },
+      to: { x: to.x.valueOf(), y: to.y.valueOf() }
+    };
 
-    if (this.current) {
-      const fromX = this.current.x.valueOf();
-      const fromY = this.current.y.valueOf();
-      const toX = this.mouseX.valueOf();
-      const toY = this.mouseY.valueOf();
-      painter.bezierAB(fromX, fromY, toX, toY);
-    }
+    if (
+      from.direction === NodeDirection.Right &&
+      to.direction === NodeDirection.Left
+    )
+      line.type = "rightLeft";
+
+    if (
+      from.direction === NodeDirection.Left &&
+      to.direction === NodeDirection.Right
+    )
+      line.type = "leftRight";
+
+    if (
+      from.direction === NodeDirection.Top &&
+      to.direction === NodeDirection.Bottom
+    )
+      line.type = "claspLeft";
+
+    if (
+      (from.direction === NodeDirection.Left ||
+        from.direction === NodeDirection.Right) &&
+      to.direction === NodeDirection.Top
+    )
+      line.type = "cornerTop";
+
+    if (
+      from.direction === NodeDirection.Bottom &&
+      (to.direction === NodeDirection.Right ||
+        to.direction === NodeDirection.Left)
+    )
+      line.type = "cornerDown";
+
+    painter.line(line);
+  }
+
+  draw(painter: Painter) {
+    for (const [from, to] of this.edges) this.drawEdge(painter, from, to);
+
+    if (this.current && this.mouseToNode)
+      this.drawEdge(painter, this.current, this.mouseToNode);
   }
 }

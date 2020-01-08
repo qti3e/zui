@@ -1,3 +1,5 @@
+import { Point2D } from "./types";
+
 /**
  * A whole bunch of functions to draw smooth lines.
  */
@@ -6,14 +8,13 @@
  * o------o
  */
 export function drawHorizontalLine(
-  ctx: Path2D,
+  ctx: Path2D | CanvasRenderingContext2D,
   y: number,
   x0: number,
   x1: number
 ): void {
   ctx.moveTo(x0, y);
   ctx.lineTo(x1, y);
-  ctx.closePath();
 }
 
 /**
@@ -22,14 +23,13 @@ export function drawHorizontalLine(
  * o
  */
 export function drawVerticalLine(
-  ctx: Path2D,
+  ctx: Path2D | CanvasRenderingContext2D,
   x: number,
   y0: number,
   y1: number
 ): void {
   ctx.moveTo(x, y0);
   ctx.lineTo(x, y1);
-  ctx.closePath();
 }
 
 /*
@@ -42,7 +42,7 @@ export function drawVerticalLine(
  *     o  o
  */
 export function drawVerticalRLine(
-  ctx: Path2D,
+  ctx: Path2D | CanvasRenderingContext2D,
   x0: number,
   y0: number,
   x1: number,
@@ -59,7 +59,6 @@ export function drawVerticalRLine(
   ctx.lineTo(x1 - neg * radius, yMid);
   ctx.arcTo(x1, yMid, x1, yMid + radius, radius);
   ctx.lineTo(x1, y1);
-  ctx.closePath();
 }
 
 /*
@@ -71,7 +70,7 @@ export function drawVerticalRLine(
  *         o-------+
  */
 export function drawHorizontalRLine(
-  ctx: Path2D,
+  ctx: Path2D | CanvasRenderingContext2D,
   x0: number,
   y0: number,
   x1: number,
@@ -88,7 +87,6 @@ export function drawHorizontalRLine(
   ctx.lineTo(xMid, y1 - neg * radius);
   ctx.arcTo(xMid, y1, xMid + radius, y1, radius);
   ctx.lineTo(x1, y1);
-  ctx.closePath();
 }
 
 /*
@@ -98,7 +96,7 @@ export function drawHorizontalRLine(
  * +---o    o---+
  */
 export function drawCornerDownLine(
-  ctx: Path2D,
+  ctx: Path2D | CanvasRenderingContext2D,
   x0: number,
   y0: number,
   x1: number,
@@ -112,7 +110,6 @@ export function drawCornerDownLine(
   ctx.lineTo(x0, y1 - radius);
   ctx.arcTo(x0, y1, x0 + neg * radius, y1, radius);
   ctx.lineTo(x1, y1);
-  ctx.closePath();
 }
 
 /*
@@ -122,7 +119,7 @@ export function drawCornerDownLine(
  *     o    o
  */
 export function drawCornerTopLine(
-  ctx: Path2D,
+  ctx: Path2D | CanvasRenderingContext2D,
   x0: number,
   y0: number,
   x1: number,
@@ -136,7 +133,6 @@ export function drawCornerTopLine(
   ctx.lineTo(x1 - neg * radius, y0);
   ctx.arcTo(x1, y0, x1, y0 + radius, radius);
   ctx.lineTo(x1, y1);
-  ctx.closePath();
 }
 
 /*
@@ -146,22 +142,36 @@ export function drawCornerTopLine(
  *   /          \
  * o-            -o
  */
-export function drawCurvedLine(
-  ctx: Path2D,
+export function drawRightLeftLine(
+  ctx: Path2D | CanvasRenderingContext2D,
   x0: number,
   y0: number,
   x1: number,
   y1: number
 ): void {
-  if (y1 === y0) return drawHorizontalLine(ctx, y0, x0, x1);
-  if (y1 < y0) return drawCurvedLine(ctx, x1, y1, x0, y0);
-  const radius = 5;
-  const neg = x0 < x1 ? 1 : -1;
-  ctx.moveTo(x0, y0);
-  ctx.lineTo(x0 + neg * radius, y0);
-  ctx.lineTo(x1 - neg * radius, y1);
-  ctx.lineTo(x1, y1);
-  ctx.closePath();
+  if (y0 === y1) return drawHorizontalLine(ctx, y1, x1, x0);
+  const radius = 55;
+  const neg = -1;
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x1 + neg * radius, y1);
+  ctx.lineTo(x0 - neg * radius, y0);
+  ctx.lineTo(x0, y0);
+}
+
+export function drawLeftRightLine(
+  ctx: Path2D | CanvasRenderingContext2D,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number
+) {
+  if (y0 === y1) return drawHorizontalLine(ctx, y1, x1, x0);
+  const radius = 55;
+  const neg = 1;
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x1 + neg * radius, y1);
+  ctx.lineTo(x0 - neg * radius, y0);
+  ctx.lineTo(x0, y0);
 }
 
 /**
@@ -172,8 +182,8 @@ export function drawCurvedLine(
  *        |     | |   |
  *        +-----+ +---+
  */
-export function drawBottom2Top(
-  ctx: Path2D,
+export function drawTopDownLine(
+  ctx: Path2D | CanvasRenderingContext2D,
   x0: number,
   y0: number,
   x1: number,
@@ -204,7 +214,7 @@ export function drawBottom2Top(
  * +--+
  */
 export function drawClaspLeft(
-  ctx: Path2D,
+  ctx: Path2D | CanvasRenderingContext2D,
   x0: number,
   y0: number,
   x1: number,
@@ -224,4 +234,19 @@ export function drawClaspLeft(
   ctx.lineTo(x1 - radius, y1 - d);
   ctx.arcTo(x1, y1 - d, x1, y1 - d + radius, radius);
   ctx.lineTo(x1, y1);
+}
+
+export interface Line {
+  type:
+    | "straight"
+    | "verticalR"
+    | "horizontalR"
+    | "cornerDown"
+    | "cornerTop"
+    | "rightLeft"
+    | "leftRight"
+    | "topDown"
+    | "claspLeft";
+  from: Point2D;
+  to: Point2D;
 }
