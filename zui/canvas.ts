@@ -12,7 +12,8 @@ import {
   ZuiMouseDownEvent,
   ZuiMouseUpEvent,
   ZuiKeydownEvent,
-  ZuiKeyupEvent
+  ZuiKeyupEvent,
+  ZuiKeys
 } from "./events";
 import { Colors } from "./colors";
 import { Shadow } from "./shadow";
@@ -111,6 +112,21 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
    * handleMouseOut.
    */
   private mouseInOut: Widget[] = [];
+
+  /**
+   * The current position of the mouse.
+   */
+  private mouseLocation: Point2D = { x: 0, y: 0 };
+
+  /**
+   * Last captured keys.
+   */
+  private lastKeys: ZuiKeys = {
+    meta: false,
+    shift: false,
+    alt: false,
+    ctrl: false
+  };
 
   /**
    * Cache widgets to canvases.
@@ -225,6 +241,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
     }
 
     if (event instanceof ZuiMouseMoveEvent) {
+      this.mouseLocation = event;
       const widgets = this.findIntersectingWidgetsWithEvent(event, [
         "handleMouseIn",
         "handleMouseOut",
@@ -235,18 +252,19 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       // Fire mouse out event. (this.mouseInOut is the previous result of
       // widgets.)
       for (const x of this.mouseInOut)
-        if (x.handleMouseOut && widgets.indexOf(x) < 0) x.handleMouseOut();
+        if (x.handleMouseOut && widgets.indexOf(x) < 0)
+          x.handleMouseOut(this.lastKeys);
 
       // Fire mouseIn & mouseMove event.
       let clickable = false;
       for (const widget of widgets) {
         if (widget.handleMouseIn && this.mouseInOut.indexOf(widget) < 0) {
-          widget.handleMouseIn();
+          widget.handleMouseIn(this.lastKeys);
         }
 
         if (widget.handleMouseMove) {
           const { x, y } = this.getCordsWithInWidget(event, widget);
-          widget.handleMouseMove!(x, y);
+          widget.handleMouseMove!(x, y, this.lastKeys);
         }
 
         if (!clickable && widget.handleClick) clickable = true;
@@ -267,7 +285,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       if (widgets.length) {
         const widget = widgets[widgets.length - 1];
         const { x, y } = this.getCordsWithInWidget(event, widget);
-        widget.handleClick!(x, y);
+        widget.handleClick!(x, y, this.lastKeys);
       }
     }
 
@@ -281,7 +299,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
         const scale = this.widgetsData.get(widget)!.scale;
         const deltaX = event.deltaX * scale;
         const deltaY = event.deltaY * scale;
-        widget.handleWheel!(deltaX, deltaY);
+        widget.handleWheel!(deltaX, deltaY, this.lastKeys);
       }
     }
 
@@ -293,7 +311,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       if (widgets.length) {
         const widget = widgets[widgets.length - 1];
         const { x, y } = this.getCordsWithInWidget(event, widget);
-        widget.handleMouseDown!(x, y);
+        widget.handleMouseDown!(x, y, this.lastKeys);
       }
     }
 
@@ -305,16 +323,34 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       if (widgets.length) {
         const widget = widgets[widgets.length - 1];
         const { x, y } = this.getCordsWithInWidget(event, widget);
-        widget.handleMouseUp!(x, y);
+        widget.handleMouseUp!(x, y, this.lastKeys);
       }
     }
 
     if (event instanceof ZuiKeydownEvent) {
-      console.log(event);
+      this.lastKeys = Object.freeze(event.keys);
+      const widgets = this.findIntersectingWidgetsWithEvent(
+        this.mouseLocation,
+        ["handleKeydown"]
+      );
+
+      if (widgets.length) {
+        const widget = widgets[widgets.length - 1];
+        widget.handleKeydown!(event.keycode, event.key, this.lastKeys);
+      }
     }
 
     if (event instanceof ZuiKeyupEvent) {
-      console.log(event);
+      this.lastKeys = Object.freeze(event.keys);
+      const widgets = this.findIntersectingWidgetsWithEvent(
+        this.mouseLocation,
+        ["handleKeyup"]
+      );
+
+      if (widgets.length) {
+        const widget = widgets[widgets.length - 1];
+        widget.handleKeyup!(event.keycode, event.key, this.lastKeys);
+      }
     }
   }
 

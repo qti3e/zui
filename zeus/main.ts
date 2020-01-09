@@ -47,11 +47,23 @@ zui.connect(
     ),
     zui.map(
       zui.event("keydown", window),
-      event => new zui.ZuiKeydownEvent(event.keyCode, event.key)
+      event =>
+        new zui.ZuiKeydownEvent(event.keyCode, event.key, {
+          meta: event.metaKey,
+          ctrl: event.ctrlKey,
+          shift: event.shiftKey,
+          alt: event.altKey
+        })
     ),
     zui.map(
       zui.event("keyup", window),
-      event => new zui.ZuiKeyupEvent(event.keyCode, event.key)
+      event =>
+        new zui.ZuiKeyupEvent(event.keyCode, event.key, {
+          meta: event.metaKey,
+          ctrl: event.ctrlKey,
+          shift: event.shiftKey,
+          alt: event.altKey
+        })
     )
   ),
   canvas

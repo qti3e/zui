@@ -2,6 +2,7 @@ import { Canvas } from "./canvas";
 import { ZuiStyle } from "./style";
 import { Reactive } from "./reactive";
 import { Painter } from "./painter";
+import { ZuiKeys } from "./events";
 
 export abstract class Widget {
   /**
@@ -70,25 +71,25 @@ export abstract class Widget {
   /**
    * Handle mouse in event.
    */
-  handleMouseIn?(): void;
+  handleMouseIn?(keys: ZuiKeys): void;
 
   /**
    * Handle mouse out.
    */
-  handleMouseOut?(): void;
+  handleMouseOut?(keys: ZuiKeys): void;
 
-  handleMouseDown?(x: number, y: number): void;
+  handleMouseDown?(x: number, y: number, keys: ZuiKeys): void;
 
-  handleMouseUp?(x: number, y: number): void;
+  handleMouseUp?(x: number, y: number, keys: ZuiKeys): void;
 
-  handleMouseMove?(x: number, y: number): void;
+  handleMouseMove?(x: number, y: number, keys: ZuiKeys): void;
 
   /**
    *
    * @param x The x offset within the element.
    * @param y The y offset within the element.
    */
-  handleClick?(x: number, y: number): void;
+  handleClick?(x: number, y: number, keys: ZuiKeys): void;
 
   /**
    * The wheel event fires when the user rotates a wheel button on a pointing
@@ -97,31 +98,23 @@ export abstract class Widget {
    * @param deltaX A double representing the horizontal scroll amount.
    * @param deltaY A double representing the vertical scroll amount.
    */
-  handleWheel?(deltaX: number, deltaY: number): void;
+  handleWheel?(deltaX: number, deltaY: number, keys: ZuiKeys): void;
 
   /**
    * Handle the keydown event.
    *
    * @param keycode
-   * @param char
+   * @param key
    * @param keys
    */
-  handleKeydown?(
-    keycode: number,
-    char: string | null,
-    keys: { meta: boolean; ctrl: boolean; alt: boolean; shift: boolean }
-  ): void;
+  handleKeydown?(keycode: number, key: string, keys: ZuiKeys): void;
 
   /**
    * Handle the keyup event.
    *
    * @param keycode
-   * @param char
+   * @param key
    * @param keys
    */
-  handleKeyup?(
-    keycode: number,
-    char: string | null,
-    keys: { meta: boolean; ctrl: boolean; alt: boolean; shift: boolean }
-  ): void;
+  handleKeyup?(keycode: number, key: string, keys: ZuiKeys): void;
 }

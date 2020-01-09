@@ -5,6 +5,7 @@ import { ZuiStyle } from "../style";
 import { connect } from "../DFG";
 import { Color } from "../color";
 import { Shadow } from "../shadow";
+import { ZuiKeys } from "../events";
 
 const MiniMapWidth = 180;
 
@@ -20,7 +21,9 @@ class MiniMapArea extends Widget {
     super();
   }
 
-  draw() {}
+  draw() {
+    console.log(+this.width, +this.height);
+  }
 }
 
 class MiniMap extends Widget {
@@ -39,14 +42,14 @@ class MiniMap extends Widget {
     readonly containedHeight: number | Reactive<number>,
     readonly offsetX: Reactive<number>,
     readonly offsetY: Reactive<number>,
-    readonly scale: Reactive<number>
+    readonly scaleFactor: Reactive<number>
   ) {
     super();
 
     const ratio = div(containedWidth, MiniMapWidth);
     this.height = r(div(containedHeight, ratio), this);
 
-    const sr = mul(scale, ratio);
+    const sr = mul(scaleFactor, ratio);
     const width = r(div(viewWidth, sr), this);
     const height = r(div(viewHeight, sr), this);
 
@@ -86,7 +89,7 @@ class Scaled extends Widget {
 export class Controller extends Widget {
   private xOffset = new Reactive(0, this);
   private yOffset = new Reactive(0, this);
-  private currentScale = new Reactive(1, this);
+  private currentScale = new Reactive(0.1, this);
 
   constructor(
     readonly width: number | Reactive<number>,
@@ -118,8 +121,16 @@ export class Controller extends Widget {
 
   draw() {}
 
-  handleWheel(deltaX: number, deltaY: number) {
+  handleWheel(deltaX: number, deltaY: number, keys: ZuiKeys) {
     const scale = this.currentScale.valueOf();
+
+    if (keys.ctrl) {
+      const newS = Math.max(0.1, Math.min(2, scale + deltaY * 0.01));
+      this.currentScale.set(newS);
+      deltaX = 0;
+      deltaY = 0;
+    }
+
     const wWidth = scale * this.widget.width.valueOf();
     const cWidth = this.width.valueOf();
     const wHeight = scale * this.widget.height.valueOf();
@@ -133,7 +144,5 @@ export class Controller extends Widget {
     this.yOffset.set(
       Math.max(minY, Math.min(0, this.yOffset.get() - deltaY * scale))
     );
-    // const newS = Math.max(0.1, Math.min(2, scale + deltaY * 0.01));
-    // this.scale.set(newS);
   }
 }

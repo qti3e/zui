@@ -20,12 +20,27 @@ export class ZuiClickEvent implements Point2D {
   constructor(readonly x: number, readonly y: number) {}
 }
 
+export type ZuiKeys = Readonly<{
+  meta: boolean;
+  alt: boolean;
+  ctrl: boolean;
+  shift: boolean;
+}>;
+
 export class ZuiKeydownEvent {
-  constructor(readonly keycode: number, readonly key: string) {}
+  constructor(
+    readonly keycode: number,
+    readonly key: string,
+    readonly keys: ZuiKeys
+  ) {}
 }
 
 export class ZuiKeyupEvent {
-  constructor(readonly keycode: number, readonly key: string) {}
+  constructor(
+    readonly keycode: number,
+    readonly key: string,
+    readonly keys: ZuiKeys
+  ) {}
 }
 
 export class ZuiWheelEvent implements Point2D {
