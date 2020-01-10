@@ -2,7 +2,8 @@ import { Canvas } from "./canvas";
 import { ZuiStyle } from "./style";
 import { Reactive } from "./reactive";
 import { Painter } from "./painter";
-import { ZuiKeys } from "./events";
+import { ZuiKeys, ZuiKeydownEvent } from "./events";
+import { ContextMenu } from "./contextMenu";
 
 export abstract class Widget {
   /**
@@ -45,6 +46,22 @@ export abstract class Widget {
 
     widget.parent = this;
     Set.prototype.add.call(this.children, widget);
+  }
+
+  /**
+   * Removes the given widget from the children list of the current one.
+   *
+   * @param widget The widget which we wish to remove from the current element.
+   */
+  protected removeChild(widget: Widget) {
+    const currentParent = widget.parent;
+    if (currentParent && currentParent !== this)
+      throw new Error(
+        "Cannot remove a widget that is not child of the current widget."
+      );
+
+    widget.parent = undefined;
+    Set.prototype.delete.call(this.children, widget);
   }
 
   /**
@@ -98,7 +115,13 @@ export abstract class Widget {
    * @param deltaX A double representing the horizontal scroll amount.
    * @param deltaY A double representing the vertical scroll amount.
    */
-  handleWheel?(deltaX: number, deltaY: number, keys: ZuiKeys): void;
+  handleWheel?(
+    deltaX: number,
+    deltaY: number,
+    x: number,
+    y: number,
+    keys: ZuiKeys
+  ): void;
 
   /**
    * Handle the keydown event.
@@ -117,4 +140,11 @@ export abstract class Widget {
    * @param keys
    */
   handleKeyup?(keycode: number, key: string, keys: ZuiKeys): void;
+
+  handleContextMenu?(
+    ctx: ContextMenu,
+    x: number,
+    y: number,
+    keys: ZuiKeys
+  ): void;
 }

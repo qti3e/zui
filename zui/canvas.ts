@@ -13,11 +13,13 @@ import {
   ZuiMouseUpEvent,
   ZuiKeydownEvent,
   ZuiKeyupEvent,
-  ZuiKeys
+  ZuiKeys,
+  ZuiContextMenuEvent
 } from "./events";
 import { Colors } from "./colors";
 import { Shadow } from "./shadow";
 import { BorderRadius } from "./border";
+import { ContextMenu } from "./contextMenu";
 
 type RenderedWidgetData = {
   clip?: Path2D;
@@ -86,6 +88,11 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
    * The default line style.
    */
   readonly defaultLineStyle: Readonly<Required<ZuiLineStyle>>;
+
+  /**
+   * The global context menu.
+   */
+  readonly contextMenu = new ContextMenu();
 
   /**
    * Last absolute position and size of every child in the current canvas.
@@ -194,6 +201,7 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       | "handleMouseMove"
       | "handleKeydown"
       | "handleKeyup"
+      | "handleContextMenu"
     )[]
   ): Widget[] {
     if (event.length < 1 || event.length > 4)
@@ -299,7 +307,8 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
         const scale = this.widgetsData.get(widget)!.scale;
         const deltaX = event.deltaX * scale;
         const deltaY = event.deltaY * scale;
-        widget.handleWheel!(deltaX, deltaY, this.lastKeys);
+        const { x, y } = this.getCordsWithInWidget(event, widget);
+        widget.handleWheel!(deltaX, deltaY, x, y, this.lastKeys);
       }
     }
 
@@ -350,6 +359,18 @@ export class Canvas implements ZuiReceiver<CanvasEvent> {
       if (widgets.length) {
         const widget = widgets[widgets.length - 1];
         widget.handleKeyup!(event.keycode, event.key, this.lastKeys);
+      }
+    }
+
+    if (event instanceof ZuiContextMenuEvent) {
+      const widgets = this.findIntersectingWidgetsWithEvent(event, [
+        "handleContextMenu"
+      ]);
+      for (const widget of widgets) {
+        const { x, y } = this.getCordsWithInWidget(event, widget);
+        widget.handleContextMenu!(this.contextMenu, x, y, this.lastKeys);
+        this.addWidget(0, 0, this.contextMenu);
+        console.log(this.contextMenu);
       }
     }
   }

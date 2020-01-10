@@ -21,9 +21,7 @@ class MiniMapArea extends Widget {
     super();
   }
 
-  draw() {
-    console.log(+this.width, +this.height);
-  }
+  draw() {}
 }
 
 class MiniMap extends Widget {
@@ -89,7 +87,7 @@ class Scaled extends Widget {
 export class Controller extends Widget {
   private xOffset = new Reactive(0, this);
   private yOffset = new Reactive(0, this);
-  private currentScale = new Reactive(0.1, this);
+  private currentScale = new Reactive(1, this);
 
   constructor(
     readonly width: number | Reactive<number>,
@@ -99,8 +97,8 @@ export class Controller extends Widget {
     super();
 
     const scaled = new Scaled(widget, this.currentScale);
-    connect(div(this.xOffset, this.currentScale), scaled.x);
-    connect(div(this.yOffset, this.currentScale), scaled.y);
+    connect(this.xOffset, scaled.x);
+    connect(this.yOffset, scaled.y);
     this.addChild(scaled);
 
     const miniMap = new MiniMap(
@@ -121,28 +119,42 @@ export class Controller extends Widget {
 
   draw() {}
 
-  handleWheel(deltaX: number, deltaY: number, keys: ZuiKeys) {
+  handleWheel(
+    deltaX: number,
+    deltaY: number,
+    x: number,
+    y: number,
+    keys: ZuiKeys
+  ) {
+    const xOffset = +this.xOffset;
+    const yOffset = +this.yOffset;
     const scale = this.currentScale.valueOf();
 
     if (keys.ctrl) {
-      const newS = Math.max(0.1, Math.min(2, scale + deltaY * 0.01));
-      this.currentScale.set(newS);
-      deltaX = 0;
+      const newScale = Math.max(0.1, Math.min(2, scale - deltaY * 0.005));
+      const deltaScale = newScale - scale;
+      this.currentScale.set(newScale);
+
+      deltaX = -x * (deltaScale - 1);
       deltaY = 0;
+      return;
     }
 
-    const wWidth = scale * this.widget.width.valueOf();
-    const cWidth = this.width.valueOf();
-    const wHeight = scale * this.widget.height.valueOf();
-    const cHeight = this.height.valueOf();
-    const minX = wWidth > cWidth ? cWidth - wWidth : 0;
-    const minY = wHeight > cHeight ? cHeight - wHeight : 0;
+    const wWidth = scale * +this.widget.width;
+    const cWidth = +this.width;
 
-    this.xOffset.set(
-      Math.max(minX, Math.min(0, this.xOffset.get() - deltaX * scale))
-    );
-    this.yOffset.set(
-      Math.max(minY, Math.min(0, this.yOffset.get() - deltaY * scale))
-    );
+    const wHeight = scale * +this.widget.height;
+    const cHeight = +this.height;
+
+    const minX = wWidth < cWidth ? -wWidth + 15 : cWidth - wWidth;
+    const maxX = wWidth < cWidth ? cWidth - 15 : 0;
+    const newXOffset = Math.min(maxX, Math.max(minX, xOffset - deltaX));
+
+    const minY = wHeight < cHeight ? -wHeight + 15 : cHeight - wHeight;
+    const maxY = wHeight < cHeight ? cHeight - 15 : 0;
+    const newYOffset = Math.min(maxY, Math.max(minY, yOffset - deltaY));
+
+    this.xOffset.set(newXOffset);
+    this.yOffset.set(newYOffset);
   }
 }

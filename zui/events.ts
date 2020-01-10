@@ -52,6 +52,10 @@ export class ZuiWheelEvent implements Point2D {
   ) {}
 }
 
+export class ZuiContextMenuEvent implements Point2D {
+  constructor(readonly x: number, readonly y: number) {}
+}
+
 export type CanvasEvent =
   | ZuiResizeEvent
   | ZuiMouseDownEvent

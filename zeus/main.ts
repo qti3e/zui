@@ -1,11 +1,20 @@
 import * as zui from "../zui";
-import { App } from "./widgets/app";
-import { initDimension, ZuiKeyupEvent } from "../zui";
+import { App } from "./app";
+import {
+  defaultZuiStyle,
+  defaultZuiTextStyle,
+  defaultZuiLineStyle
+} from "./style";
 
 // Create canvas.
 
-initDimension();
-const canvas = new zui.Canvas(window.innerWidth, window.innerHeight);
+zui.initDimension();
+const canvas = new zui.Canvas(window.innerWidth, window.innerHeight, {
+  style: defaultZuiStyle,
+  textStyle: defaultZuiTextStyle,
+  lineStyle: defaultZuiLineStyle,
+  alpha: false
+});
 canvas.addWidget(0, 0, new App());
 
 // ----
@@ -64,10 +73,20 @@ zui.connect(
           shift: event.shiftKey,
           alt: event.altKey
         })
+    ),
+    zui.map(
+      zui.event("contextmenu", window),
+      event => new zui.ZuiContextMenuEvent(event.x, event.y)
     )
   ),
   canvas
 );
+
+// Disable the default context menu.
+window.oncontextmenu = (event: MouseEvent) => {
+  event.preventDefault();
+  return false;
+};
 
 // ---
 

@@ -22,3 +22,5 @@ export * from "./shadow";
 export * from "./widgets/controller";
 export * from "./widgets/draggable";
 export * from "./widgets/node";
+export * from "./widgets/stack";
+export * from "./contextMenu";

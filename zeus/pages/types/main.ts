@@ -18,6 +18,9 @@ import {
   Colors
 } from "../../../zui";
 
+import { Toolbar } from "./toolbar";
+import { TypesEditorBoard } from "./board";
+
 export class TypeNode extends Widget {
   width = 300;
   height = 50;
@@ -82,6 +85,9 @@ export class TypesEditorView extends Widget {
   height = 3000;
   draggable = new Draggable();
   nodeEditor = new NodeEditor(this);
+  style: ZuiStyle = {
+    background: Color.HEX(0xfefefe, 0.7)
+  };
 
   constructor() {
     super();
@@ -113,11 +119,23 @@ export class TypesEditor extends Widget {
   width = r(sub(pageWidth, 48), this);
   height = pageHeight;
 
+  readonly toolbar: Toolbar;
+  readonly board: TypesEditorBoard;
+
   constructor() {
     super();
-    this.addChild(
-      new Controller(this.width, this.height, new TypesEditorView())
+    this.toolbar = new Toolbar(this.width);
+    this.board = new TypesEditorBoard();
+
+    const controller = new Controller(
+      this.width,
+      r(sub(pageHeight, 50), this),
+      this.board
     );
+
+    controller.y.set(50);
+    this.addChild(controller);
+    this.addChild(this.toolbar);
   }
 
   draw() {}

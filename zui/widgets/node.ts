@@ -6,6 +6,7 @@ import { add, r } from "../math";
 import { Line } from "../lines";
 import { BorderRadius } from "../border";
 import { Color } from "../color";
+import { Colors } from "../colors";
 
 // A node editor.
 
@@ -80,6 +81,9 @@ export class NodeEditor<T = unknown> extends Widget {
   readonly height: number | Reactive<number>;
   readonly edges: [Node<T>, Node<T>][] = [];
   private current: Node<T> | undefined;
+  readonly style: ZuiStyle = {
+    background: Colors.transparent
+  };
 
   private updated = new Reactive<number>(0, this);
   private mouseX = new Reactive<number>(0, this);
